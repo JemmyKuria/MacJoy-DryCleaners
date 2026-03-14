@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block page_title %}Settings{% endblock %}
+{% block content %}
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- CREATE ATTENDANT FORM -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+  <div class="form-card">
+    <div style="font-size:16px; font-weight:700; color:#1e40af; 
+                margin-bottom:20px; padding-bottom:12px; 
+                border-bottom:2px solid #eff6ff;">
+      👤 Create Attendant Account
+    </div>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="full_name" class="form-control"
+               placeholder="e.g. Jane Wanjiku" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control"
+               placeholder="e.g. jane123" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control"
+               placeholder="Strong password" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">
+        Create Account →
+      </button>
+    </form>
+  </div>
+
+  <!-- ATTENDANT LIST -->
+  <div class="table-card" style="height:fit-content;">
+    <div class="table-card-header">
+      <div class="table-card-title">Attendant Accounts</div>
+      <span style="font-size:13px; color:#64748b;">
+        {{ attendants|length }} account(s)
+      </span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for attendant in attendants %}
+        <tr>
+          <td><strong>{{ attendant.first_name|default:attendant.username }}</strong></td>
+          <td>{{ attendant.username }}</td>
+          <td>
+            {% if attendant.is_active %}
+              <span class="badge badge-ready">Active</span>
+            {% else %}
+              <span class="badge badge-collected">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'toggle_attendant' attendant.id %}"
+               class="btn btn-outline"
+               style="font-size:12px; padding:5px 12px;">
+              {% if attendant.is_active %}Deactivate{% else %}Activate{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center; color:#94a3b8; padding:24px;">
+            No attendant accounts yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}

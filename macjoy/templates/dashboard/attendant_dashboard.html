@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Attendant Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_orders_today }}</div>
+    <div class="stat-label">Orders Today</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-value">{{ pending_orders }}</div>
+    <div class="stat-label">Pending Orders</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ ready_orders }}</div>
+    <div class="stat-label">Ready for Collection</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-value">{{ urgent_orders.count }}</div>
+    <div class="stat-label">Urgent Orders</div>
+  </div>
+</div>
+
+<!-- URGENT ORDERS -->
+{% if urgent_orders %}
+<div class="table-card" style="margin-bottom: 24px;">
+  <div class="table-card-header">
+    <div class="table-card-title">⚡ Urgent Orders</div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Order No.</th>
+        <th>Client</th>
+        <th>Service</th>
+        <th>Pickup Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in urgent_orders %}
+      <tr>
+        <td><strong>{{ order.order_number }}</strong></td>
+        <td>{{ order.customer.full_name }}</td>
+        <td>{{ order.get_service_type_display }}</td>
+        <td>{{ order.pickup_date }}</td>
+        <td><span class="badge badge-{{ order.collection_status }}">{{ order.get_collection_status_display }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- RECENT ORDERS -->
+<div class="table-card">
+  <div class="table-card-header">
+    <div class="table-card-title">Recent Orders</div>
+    <a href="{% url 'attendant_orders' %}" class="btn btn-outline">View All</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Order No.</th>
+        <th>Client</th>
+        <th>Service</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in recent_orders %}
+      <tr>
+        <td><strong>{{ order.order_number }}</strong></td>
+        <td>{{ order.customer.full_name }}</td>
+        <td>{{ order.get_service_type_display }}</td>
+        <td><span class="badge badge-{{ order.payment_status }}">{{ order.get_payment_status_display }}</span></td>
+        <td><span class="badge badge-{{ order.collection_status }}">{{ order.get_collection_status_display }}</span></td>
+        <td>{{ order.created_at|date:"M d, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center; color:#94a3b8; padding:32px;">
+          No orders yet. <a href="{% url 'new_order' %}">Create the first order →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

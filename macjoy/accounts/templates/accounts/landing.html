@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MACJOY DrCleaners — Joy in Every Wash</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sky:    #38B6FF;
+  --deep:   #023E8A;
+  --teal:   #00B4D8;
+  --pale:   #E8F6FF;
+  --frost:  #F4FBFF;
+  --ink:    #0D1B2A;
+  --slate:  #4A6372;
+  --white:  #FFFFFF;
+  --border: #D6EEFF;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ─────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+nav.scrolled {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  padding: 14px 48px;
+  box-shadow: 0 2px 24px rgba(0,119,182,0.1);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+nav.scrolled .nav-logo { color: var(--deep); }
+nav.scrolled .nav-logo span { color: var(--sky); }
+.nav-logo span { color: #90e0ef; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+nav.scrolled .nav-links a { color: var(--slate); }
+.nav-links a:hover { color: var(--sky) !important; }
+
+.nav-cta {
+  background: var(--sky);
+  color: var(--white) !important;
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(56,182,255,0.4);
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(56,182,255,0.5) !important;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger span {
+  width: 24px; height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+nav.scrolled .hamburger span { background: var(--ink); }
+
+/* ── HERO ───────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(150deg, #012A5E 0%, #023E8A 40%, #0096C7 80%, #38B6FF 100%);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 48px 80px;
+}
+
+.hero-bubbles { position: absolute; inset: 0; pointer-events: none; }
+
+.hb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4), rgba(144,224,239,0.1) 60%, transparent);
+  border: 1px solid rgba(255,255,255,0.25);
+  animation: hbRise linear infinite;
+}
+
+@keyframes hbRise {
+  0%   { transform: translateY(110vh); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 0.7; }
+  100% { transform: translateY(-15vh) translateX(20px); opacity: 0; }
+}
+
+.hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 100px;
+  padding: 6px 18px;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 28px;
+  backdrop-filter: blur(8px);
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: #90e0ef;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #90e0ef;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 5.5vw, 74px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #fff;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.hero-title .accent {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.5);
+}
+
+.hero-title .sky { color: #90e0ef; }
+
+.hero-sub {
+  font-size: 17px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 460px;
+}
+
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.btn-hero-primary {
+  background: var(--sky);
+  color: #fff;
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 28px rgba(56,182,255,0.45);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-block;
+}
+
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(56,182,255,0.6);
+}
+
+.btn-hero-ghost {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  display: inline-block;
+}
+
+.btn-hero-ghost:hover { background: rgba(255,255,255,0.14); }
+
+.hero-visual { display: flex; flex-direction: column; gap: 16px; }
+
+.hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.hero-stat {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.hero-stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.hero-stat-num span { color: #90e0ef; }
+
+.hero-stat-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.hero-tagcard {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-tagcard-icon {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--sky), #90e0ef);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.hero-tagcard-text strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.hero-tagcard-text span { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+/* ── SECTIONS ───────────────────────────────────── */
+section { padding: 100px 48px; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sky);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-title em { font-style: italic; color: var(--sky); }
+.section-sub { font-size: 16px; color: var(--slate); line-height: 1.7; max-width: 520px; }
+
+/* ── SERVICES ───────────────────────────────────── */
+#services { background: var(--frost); }
+
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 56px;
+  gap: 32px;
+}
+
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.service-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 36px 32px;
+  border: 1px solid var(--border);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--sky), var(--teal));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover::before { transform: scaleX(1); }
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(56,182,255,0.14);
+  border-color: var(--sky);
+}
+
+.service-icon {
+  width: 64px; height: 64px;
+  background: var(--pale);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin-bottom: 24px;
+  transition: background 0.25s;
+}
+
+.service-card:hover .service-icon { background: var(--sky); }
+
+.service-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.service-desc { font-size: 14px; color: var(--slate); line-height: 1.7; margin-bottom: 20px; }
+.service-price { font-size: 12px; font-weight: 600; color: var(--sky); letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── HOW IT WORKS ───────────────────────────────── */
+#how-it-works { background: var(--white); }
+.steps-header { text-align: center; margin-bottom: 72px; }
+.steps-header .section-sub { margin: 0 auto; }
+
+.steps-track {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  position: relative;
+}
+
+.steps-track::before {
+  content: '';
+  position: absolute;
+  top: 52px;
+  left: calc(16.66% + 32px);
+  right: calc(16.66% + 32px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--sky), var(--teal), var(--sky));
+}
+
+.step { text-align: center; padding: 0 32px; position: relative; z-index: 1; }
+
+.step-num {
+  width: 104px; height: 104px;
+  background: linear-gradient(135deg, var(--deep), var(--sky));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(56,182,255,0.3);
+  position: relative;
+}
+
+.step-num::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(56,182,255,0.2);
+}
+
+.step-icon {
+  position: absolute;
+  bottom: -8px; right: -8px;
+  width: 36px; height: 36px;
+  background: var(--white);
+  border-radius: 50%;
+  border: 2px solid var(--pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.step-desc { font-size: 14px; color: var(--slate); line-height: 1.7; }
+
+/* ── WHY US ─────────────────────────────────────── */
+#why-us {
+  background: linear-gradient(135deg, #012A5E 0%, #023E8A 60%, #0096C7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+#why-us::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(56,182,255,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.why-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.why-left .section-title { color: #fff; }
+.why-left .section-label { color: #90e0ef; }
+.why-left .section-sub   { color: rgba(255,255,255,0.6); }
+
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.why-card {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 28px 24px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.why-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-3px); }
+.why-card-icon { font-size: 28px; margin-bottom: 14px; }
+.why-card-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.why-card-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+/* ── GARMENTS ───────────────────────────────────── */
+#garments { background: var(--frost); }
+.garments-header { text-align: center; margin-bottom: 56px; }
+.garments-header .section-sub { margin: 0 auto; }
+.garments-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+
+.garment-pill {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--slate);
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.garment-pill:hover {
+  background: var(--sky);
+  border-color: var(--sky);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(56,182,255,0.25);
+}
+
+.garment-pill .gpicon { display: block; font-size: 22px; margin-bottom: 6px; }
+
+/* ── CONTACT ────────────────────────────────────── */
+#contact { background: var(--white); }
+
+.contact-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+
+.contact-info .section-sub { margin-bottom: 36px; }
+
+.contact-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+
+.contact-item-icon {
+  width: 44px; height: 44px;
+  background: var(--pale);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contact-item-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sky);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.contact-item-value { font-size: 15px; color: var(--ink); font-weight: 500; }
+
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #25D366;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(37,211,102,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.whatsapp-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(37,211,102,0.45);
+}
+
+.contact-hours {
+  background: var(--frost);
+  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  margin-top: 32px;
+}
+
+.contact-hours h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.hour-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.hour-row:last-child { border-bottom: none; }
+.hour-row span:first-child { color: var(--slate); }
+.hour-row span:last-child { font-weight: 600; color: var(--ink); }
+
+.contact-form-card {
+  background: var(--frost);
+  border-radius: 28px;
+  padding: 44px 40px;
+  border: 1px solid var(--border);
+}
+
+.contact-form-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+.cf-group { margin-bottom: 20px; }
+
+.cf-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--slate);
+  margin-bottom: 8px;
+}
+
+.cf-input {
+  width: 100%;
+  padding: 13px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cf-input:focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(56,182,255,0.12);
+}
+
+textarea.cf-input { resize: vertical; min-height: 120px; }
+.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.cf-submit {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--deep), var(--sky));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(56,182,255,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.cf-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(56,182,255,0.4);
+}
+
+/* ── FOOTER ─────────────────────────────────────── */
+footer { background: var(--ink); padding: 64px 48px 32px; color: rgba(255,255,255,0.5); }
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-brand-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.footer-brand-name span { color: var(--sky); }
+
+.footer-tagline {
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 260px;
+}
+
+.footer-col h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a { font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s; }
+.footer-col ul li a:hover { color: var(--sky); }
+
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.footer-bottom a { color: var(--sky); text-decoration: none; }
+
+/* ── MOBILE MENU ────────────────────────────────── */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(2,62,138,0.98);
+  backdrop-filter: blur(16px);
+  z-index: 999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.mobile-menu.open { display: flex; }
+
+.mobile-menu a {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.mobile-menu a:hover { color: var(--sky); }
+
+.mobile-close {
+  position: absolute;
+  top: 24px; right: 24px;
+  font-size: 28px;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* ── SCROLL REVEAL ──────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .garments-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-top    { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  nav.scrolled { padding: 12px 24px; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  section { padding: 72px 24px; }
+  .hero { padding: 100px 24px 72px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+  .hero-visual { display: none; }
+  .services-grid { grid-template-columns: 1fr; }
+  .steps-track { grid-template-columns: 1fr; gap: 48px; }
+  .steps-track::before { display: none; }
+  .why-inner { grid-template-columns: 1fr; gap: 48px; }
+  .garments-grid { grid-template-columns: repeat(2, 1fr); }
+  .contact-inner { grid-template-columns: 1fr; gap: 48px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .cf-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMobile()">✕</button>
+  <a href="#services" onclick="closeMobile()">Services</a>
+  <a href="#how-it-works" onclick="closeMobile()">How It Works</a>
+  <a href="#why-us" onclick="closeMobile()">Why Us</a>
+  <a href="#garments" onclick="closeMobile()">Garments</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">MACJOY <span>DC</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#why-us">Why Us</a></li>
+    <li><a href="#garments">Garments</a></li>
+    <li><a href="#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+  <div class="hamburger" onclick="openMobile()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bubbles" id="heroBubbles"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">Nairobi's Premium DrCleaners</div>
+      <h1 class="hero-title">
+        Joy in<br>
+        <span class="sky">Every</span><br>
+        <span class="accent">Wash.</span>
+      </h1>
+      <p class="hero-sub">Professional laundry care for corporate wear, ceremonial gowns, military uniforms, and everyday garments. Drop off — we handle the rest.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-hero-primary">Drop Off Your Order</a>
+        <a href="#services" class="btn-hero-ghost">Our Services →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num">500<span>+</span></div>
+          <div class="hero-stat-label">Happy Clients</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">6</div>
+          <div class="hero-stat-label">Garment Categories</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">3</div>
+          <div class="hero-stat-label">Service Types</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">24<span>h</span></div>
+          <div class="hero-stat-label">SMS Notification</div>
+        </div>
+      </div>
+      <div class="hero-tagcard">
+        <div class="hero-tagcard-icon">📱</div>
+        <div class="hero-tagcard-text">
+          <strong>SMS When Ready</strong>
+          <span>Get notified the moment your order is ready for pickup</span>
+        </div>
+      </div>
+      <div class="hero-tagcard">
+        <div class="hero-tagcard-icon">🧺</div>
+        <div class="hero-tagcard-text">
+          <strong>Basket or Single Item</strong>
+          <span>Flexible pricing agreed at the counter — no surprises</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="services-header">
+      <div>
+        <div class="section-label">What We Do</div>
+        <h2 class="section-title">Our <em>Services</em></h2>
+      </div>
+      <p class="section-sub">From everyday wear to ceremonial gowns — we treat every piece with the care it deserves.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon">🧺</div>
+        <div class="service-title">Wash &amp; Fold</div>
+        <p class="service-desc">Full basket laundry service. We wash, dry, and fold your everyday garments — fresh, clean, and neatly packed.</p>
+        <div class="service-price">Basket-based pricing</div>
+      </div>
+      <div class="service-card reveal" style="transition-delay:.1s">
+        <div class="service-icon">👔</div>
+        <div class="service-title">Wash &amp; Press</div>
+        <p class="service-desc">Complete laundering with professional steam ironing. Perfect for corporate wear, uniforms, and formal attire.</p>
+        <div class="service-price">Basket or per-item pricing</div>
+      </div>
+      <div class="service-card reveal" style="transition-delay:.2s">
+        <div class="service-icon">🎓</div>
+        <div class="service-title">Pressing Only</div>
+        <p class="service-desc">Expert steam ironing for already-washed garments. Crisp finishes for graduation gowns, choir robes, and suits.</p>
+        <div class="service-price">Per-item pricing</div>
+      </div>
+      <div class="service-card reveal" style="transition-delay:.3s">
+        <div class="service-icon">🎖️</div>
+        <div class="service-title">Specialized Item Care</div>
+        <p class="service-desc">Military uniforms, ceremonial wear, wedding gowns, and delicate event garments handled with expert precision.</p>
+        <div class="service-price">Negotiated at counter</div>
+      </div>
+      <div class="service-card reveal" style="transition-delay:.4s">
+        <div class="service-icon">🎗️</div>
+        <div class="service-title">Event &amp; Choir Wear</div>
+        <p class="service-desc">Bulk orders welcome. Choir robes, graduation regalia, and event uniforms prepared on schedule.</p>
+        <div class="service-price">Bulk pricing available</div>
+      </div>
+      <div class="service-card reveal" style="transition-delay:.5s">
+        <div class="service-icon">⚡</div>
+        <div class="service-title">Urgent Orders</div>
+        <p class="service-desc">Need it fast? Flag your order as urgent at drop-off and we'll prioritize your items ahead of the queue.</p>
+        <div class="service-price">Priority surcharge applies</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="steps-header">
+      <div class="section-label">The Process</div>
+      <h2 class="section-title">How It <em>Works</em></h2>
+      <p class="section-sub">Three simple steps — drop off, relax, and pick up fresh.</p>
+    </div>
+    <div class="steps-track">
+      <div class="step reveal">
+        <div class="step-num">01<div class="step-icon">🚶</div></div>
+        <h3 class="step-title">Drop Off</h3>
+        <p class="step-desc">Bring your basket or individual items to our counter. We agree on the service and pricing together — no hidden fees.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.15s">
+        <div class="step-num">02<div class="step-icon">✨</div></div>
+        <h3 class="step-title">Expert Care</h3>
+        <p class="step-desc">Your garments are washed, dried, and ironed by our team using professional equipment and quality detergents.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.3s">
+        <div class="step-num">03<div class="step-icon">📱</div></div>
+        <h3 class="step-title">SMS &amp; Pickup</h3>
+        <p class="step-desc">Receive an SMS the moment your order is ready. Come in at your convenience and collect your fresh, clean garments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why-us">
+  <div class="section-inner why-inner">
+    <div class="why-left reveal">
+      <div class="section-label">Why MACJOY</div>
+      <h2 class="section-title">We Care<br>About <em>Every</em><br>Garment</h2>
+      <p class="section-sub" style="margin-bottom:32px;">From your daily wear to your most prized ceremonial robes — every item gets the same attention and respect.</p>
+      <a href="#contact" class="btn-hero-primary" style="display:inline-block;">Get In Touch</a>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <div class="why-card-icon">💬</div>
+        <div class="why-card-title">Negotiated Pricing</div>
+        <div class="why-card-desc">Fair prices agreed at the counter. You always know what you're paying before we start.</div>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.1s">
+        <div class="why-card-icon">📲</div>
+        <div class="why-card-title">SMS Updates</div>
+        <div class="why-card-desc">Real-time notification sent straight to your phone the moment your order is ready.</div>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.2s">
+        <div class="why-card-icon">🎖️</div>
+        <div class="why-card-title">Specialized Handling</div>
+        <div class="why-card-desc">Military uniforms, graduation gowns, choir robes — we know how to handle specialized garments.</div>
+      </div>
+      <div class="why-card reveal" style="transition-delay:.3s">
+        <div class="why-card-icon">⚡</div>
+        <div class="why-card-title">Urgent Service</div>
+        <div class="why-card-desc">Need your items fast? Urgent orders are prioritized so you're never left waiting when it matters most.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GARMENTS -->
+<section id="garments">
+  <div class="section-inner">
+    <div class="garments-header">
+      <div class="section-label">What We Handle</div>
+      <h2 class="section-title">Every Garment <em>Category</em></h2>
+      <p class="section-sub">From casual everyday wear to the most delicate ceremonial robes.</p>
+    </div>
+    <div class="garments-grid">
+      <div class="garment-pill reveal"><span class="gpicon">👔</span>Corporate</div>
+      <div class="garment-pill reveal" style="transition-delay:.05s"><span class="gpicon">🎉</span>Event Wear</div>
+      <div class="garment-pill reveal" style="transition-delay:.1s"><span class="gpicon">🎓</span>Graduation</div>
+      <div class="garment-pill reveal" style="transition-delay:.15s"><span class="gpicon">🎵</span>Choir Robes</div>
+      <div class="garment-pill reveal" style="transition-delay:.2s"><span class="gpicon">🎖️</span>Military</div>
+      <div class="garment-pill reveal" style="transition-delay:.25s"><span class="gpicon">👗</span>Regular Wear</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="contact-inner">
+      <div class="contact-info reveal">
+        <div class="section-label">Get In Touch</div>
+        <h2 class="section-title">Come Visit<br><em>MACJOY</em></h2>
+        <p class="section-sub">Drop by our counter, send a message on WhatsApp, or simply call us. We're always happy to help.</p>
+        <br/>
+        <div class="contact-item">
+          <div class="contact-item-icon">📍</div>
+          <div>
+            <div class="contact-item-label">Location</div>
+            <div class="contact-item-value">Nairobi, Kenya</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon">📞</div>
+          <div>
+            <div class="contact-item-label">Phone</div>
+            <div class="contact-item-value">+254 700 000 000</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon">📧</div>
+          <div>
+            <div class="contact-item-label">Email</div>
+            <div class="contact-item-value">hello@macjoycleaners.co.ke</div>
+          </div>
+        </div>
+        <a href="https://wa.me/254700000000?text=Hello%20MACJOY%2C%20I%27d%20like%20to%20enquire%20about%20your%20services"
+           class="whatsapp-btn" target="_blank">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Chat on WhatsApp
+        </a>
+        <div class="contact-hours">
+          <h4>Business Hours</h4>
+          <div class="hour-row"><span>Monday – Friday</span><span>7:00 AM – 7:00 PM</span></div>
+          <div class="hour-row"><span>Saturday</span><span>8:00 AM – 5:00 PM</span></div>
+          <div class="hour-row"><span>Sunday</span><span>Upon Request</span></div>
+        </div>
+      </div>
+      <div class="contact-form-card reveal" style="transition-delay:.15s">
+        <h3>Send Us a Message</h3>
+        <div class="cf-row">
+          <div class="cf-group">
+            <label class="cf-label">Full Name</label>
+            <input type="text" class="cf-input" placeholder="Jane Wanjiku"/>
+          </div>
+          <div class="cf-group">
+            <label class="cf-label">Phone Number</label>
+            <input type="tel" class="cf-input" placeholder="+254 7XX XXX XXX"/>
+          </div>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Service Needed</label>
+          <select class="cf-input">
+            <option value="">Select a service...</option>
+            <option>Wash &amp; Fold</option>
+            <option>Wash &amp; Press</option>
+            <option>Pressing Only</option>
+            <option>Specialized Item Care</option>
+            <option>Urgent Order</option>
+          </select>
+        </div>
+        <div class="cf-group">
+          <label class="cf-label">Message</label>
+          <textarea class="cf-input" placeholder="Tell us about your garments or any special requirements..."></textarea>
+        </div>
+        <button class="cf-submit">Send Message →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand-name">MACJOY <span>DC</span></div>
+        <p class="footer-tagline">Professional dry cleaning and laundry services in Nairobi. Joy in every wash — from everyday wear to your most prized ceremonial garments.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Wash &amp; Fold</a></li>
+          <li><a href="#services">Wash &amp; Press</a></li>
+          <li><a href="#services">Pressing Only</a></li>
+          <li><a href="#services">Specialized Care</a></li>
+          <li><a href="#services">Urgent Orders</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Garments</h4>
+        <ul>
+          <li><a href="#garments">Corporate Wear</a></li>
+          <li><a href="#garments">Military Uniforms</a></li>
+          <li><a href="#garments">Graduation Gowns</a></li>
+          <li><a href="#garments">Choir Robes</a></li>
+          <li><a href="#garments">Event Wear</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+254700000000">+254 700 000 000</a></li>
+          <li><a href="mailto:hello@macjoycleaners.co.ke">Email Us</a></li>
+          <li><a href="https://wa.me/254700000000">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 MACJOY DrCleaners. All rights reserved.</span>
+      <span>Built with ❤️ in Nairobi</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+function openMobile()  { document.getElementById('mobileMenu').classList.add('open'); }
+function closeMobile() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+const hbc = document.getElementById('heroBubbles');
+for (let i = 0; i < 22; i++) {
+  const b = document.createElement('div');
+  b.className = 'hb';
+  const s = 6 + Math.random() * 28;
+  b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:-${s}px;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*6}s;`;
+  hbc.appendChild(b);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

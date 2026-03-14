@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block page_title %}Order {{ order.order_number }}{% endblock %}
+{% block content %}
+
+<!-- HEADER -->
+<div style="display:flex; align-items:center; justify-content:space-between; 
+            margin-bottom:24px;">
+  <a href="{% url 'attendant_orders' %}" class="btn btn-outline">← Back to Orders</a>
+  <div style="display:flex; gap:8px;">
+    <span class="badge badge-{{ order.payment_status }}" style="font-size:13px; padding:6px 14px;">
+      {{ order.get_payment_status_display }}
+    </span>
+    <span class="badge badge-{{ order.collection_status }}" style="font-size:13px; padding:6px 14px;">
+      {{ order.get_collection_status_display }}
+    </span>
+    {% if order.is_urgent %}
+      <span class="badge badge-urgent" style="font-size:13px; padding:6px 14px;">⚡ Urgent</span>
+    {% endif %}
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+  <!-- LEFT COLUMN -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- ORDER INFO -->
+    <div style="background:#fff; border-radius:12px; padding:24px;
+                box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="font-size:14px; font-weight:700; color:#1e40af; 
+                  margin-bottom:16px; padding-bottom:12px;
+                  border-bottom:2px solid #eff6ff;">
+        📋 Order Information
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Order Number</span>
+          <span style="font-size:13px; font-weight:700;">{{ order.order_number }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Order Type</span>
+          <span style="font-size:13px; font-weight:600;">{{ order.get_order_type_display }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Service Type</span>
+          <span style="font-size:13px; font-weight:600;">{{ order.get_service_type_display }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Pickup Date</span>
+          <span style="font-size:13px; font-weight:600;">{{ order.pickup_date }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Date Created</span>
+          <span style="font-size:13px; font-weight:600;">{{ order.created_at|date:"M d, Y · h:i A" }}</span>
+        </div>
+        {% if order.completion_date %}
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Completed On</span>
+          <span style="font-size:13px; font-weight:600;">{{ order.completion_date|date:"M d, Y · h:i A" }}</span>
+        </div>
+        {% endif %}
+        {% if order.notes %}
+        <div style="border-top:1px solid #f1f5f9; padding-top:12px; margin-top:4px;">
+          <span style="font-size:13px; color:#64748b; display:block; margin-bottom:6px;">Notes</span>
+          <span style="font-size:13px; color:#0f172a;">{{ order.notes }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- CLIENT INFO -->
+    <div style="background:#fff; border-radius:12px; padding:24px;
+                box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="font-size:14px; font-weight:700; color:#1e40af; 
+                  margin-bottom:16px; padding-bottom:12px;
+                  border-bottom:2px solid #eff6ff;">
+        👤 Client Information
+      </div>
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+        <div style="width:48px; height:48px; background:#1e40af; border-radius:12px;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:20px; color:#fff; font-weight:700; flex-shrink:0;">
+          {{ order.customer.full_name|first|upper }}
+        </div>
+        <div>
+          <div style="font-size:16px; font-weight:700; color:#0f172a;">
+            {{ order.customer.full_name }}
+          </div>
+          <div style="font-size:13px; color:#64748b;">
+            📱 {{ order.customer.phone_number }}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="font-size:13px; color:#64748b;">Total Visits</span>
+        <span style="font-size:13px; font-weight:700; color:#1e40af;">
+          {{ order.customer.total_visits }} visit(s)
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- PAYMENT INFO -->
+    <div style="background:#fff; border-radius:12px; padding:24px;
+                box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="font-size:14px; font-weight:700; color:#1e40af; 
+                  margin-bottom:16px; padding-bottom:12px;
+                  border-bottom:2px solid #eff6ff;">
+        💳 Payment Information
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Total Price</span>
+          <span style="font-size:16px; font-weight:700; color:#0f172a;">
+            KSh {{ order.total_price }}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-size:13px; color:#64748b;">Amount Paid</span>
+          <span style="font-size:15px; font-weight:700; color:#15803d;">
+            KSh {{ order.amount_paid }}
+          </span>
+        </div>
+        <div style="border-top:1px solid #f1f5f9; padding-top:12px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="font-size:13px; color:#64748b;">Balance Due</span>
+            <span style="font-size:15px; font-weight:700; color:#b91c1c;">
+              KSh {{ balance_due }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATE STATUS -->
+    <div style="background:#fff; border-radius:12px; padding:24px;
+                box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="font-size:14px; font-weight:700; color:#1e40af; 
+                  margin-bottom:16px; padding-bottom:12px;
+                  border-bottom:2px solid #eff6ff;">
+        🔄 Update Status
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label class="form-label">Collection Status</label>
+          <form method="POST" action="{% url 'update_order_status' order.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'order_detail' order.id %}">
+            <select name="collection_status" class="form-control" onchange="this.form.submit()">
+              <option value="received" {% if order.collection_status == 'received' %}selected{% endif %}>Received</option>
+              <option value="ready" {% if order.collection_status == 'ready' %}selected{% endif %}>Ready</option>
+              <option value="collected" {% if order.collection_status == 'collected' %}selected{% endif %}>Collected</option>
+            </select>
+          </form>
+        </div>
+        <div>
+          <label class="form-label">Payment Status</label>
+          <form method="POST" action="{% url 'update_payment_status' order.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'order_detail' order.id %}">
+            <select name="payment_status" class="form-control" onchange="this.form.submit()">
+              <option value="unpaid" {% if order.payment_status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+              <option value="partial" {% if order.payment_status == 'partial' %}selected{% endif %}>Partial</option>
+              <option value="paid" {% if order.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+            </select>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ORDER ITEMS -->
+<div class="table-card" style="margin-top:24px;">
+  <div class="table-card-header">
+    <div class="table-card-title">Order Items</div>
+    <span style="font-size:13px; color:#64748b;">{{ items|length }} item(s)</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td><strong>{{ item.item_name }}</strong></td>
+        <td>{{ item.get_category_display }}</td>
+        <td>{{ item.description|default:"—" }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>KSh {{ item.unit_price }}</td>
+        <td><strong>KSh {{ item.unit_price }}</strong></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center; color:#94a3b8; padding:24px;">
+          No items recorded for this order.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr style="background:#f8fafc;">
+        <td colspan="5" style="text-align:right; font-weight:700; padding:12px 16px;">
+          Total
+        </td>
+        <td style="font-weight:700; font-size:15px; padding:12px 16px;">
+          KSh {{ order.total_price }}
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+{% endblock %}

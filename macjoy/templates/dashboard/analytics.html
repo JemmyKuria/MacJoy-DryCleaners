@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% block page_title %}Analytics{% endblock %}
+{% block content %}
+
+<!-- HIDDEN DATA FOR CHARTS -->
+<span id="revenueLabels" data-value="{{ revenue_labels|safe }}" style="display:none;"></span>
+<span id="revenueData" data-value="{{ revenue_data|safe }}" style="display:none;"></span>
+<span id="serviceLabels" data-value="{{ service_labels|safe }}" style="display:none;"></span>
+<span id="serviceCounts" data-value="{{ service_counts|safe }}" style="display:none;"></span>
+<span id="categoryLabels" data-value="{{ category_labels|safe }}" style="display:none;"></span>
+<span id="categoryCounts" data-value="{{ category_counts|safe }}" style="display:none;"></span>
+<span id="weekdayLabels" data-value="{{ weekday_labels|safe }}" style="display:none;"></span>
+<span id="weekdayCounts" data-value="{{ weekday_counts|safe }}" style="display:none;"></span>
+<span id="paymentLabels" data-value="{{ payment_labels|safe }}" style="display:none;"></span>
+<span id="paymentCounts" data-value="{{ payment_counts|safe }}" style="display:none;"></span>
+<span id="newClientLabels" data-value="{{ new_client_labels|safe }}" style="display:none;"></span>
+<span id="newClientData" data-value="{{ new_client_data|safe }}" style="display:none;"></span>
+<span id="returningClients" data-value="{{ returning_clients }}" style="display:none;"></span>
+<span id="newOnlyClients" data-value="{{ new_only_clients }}" style="display:none;"></span>
+
+<!-- PERIOD FILTER -->
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+  <label style="font-size:13px; font-weight:600; color:#64748b;">Period:</label>
+  <select id="periodSelect" class="form-control" style="width:200px;"
+          onchange="window.location.href='?period=' + this.value">
+    <option value="week" {% if period == 'week' %}selected{% endif %}>This Week</option>
+    <option value="month" {% if period == 'month' %}selected{% endif %}>This Month</option>
+    <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>Last 3 Months</option>
+    <option value="year" {% if period == 'year' %}selected{% endif %}>This Year</option>
+  </select>
+</div>
+
+<!-- REVENUE SUMMARY STATS -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Revenue Summary
+  </div>
+</div>
+<div class="stat-cards" style="margin-bottom:32px;">
+  <div class="stat-card green">
+    <div class="stat-value">{{ total_revenue }}</div>
+    <div class="stat-label">Total Revenue KSh</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ total_orders }}</div>
+    <div class="stat-label">Total Orders</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ avg_order_value }}</div>
+    <div class="stat-label">Avg Order Value KSh</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ best_day_revenue }}</div>
+    <div class="stat-label">Best Day · {{ best_day_label }}</div>
+  </div>
+</div>
+
+<!-- REVENUE CHART -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Revenue Over Time
+  </div>
+</div>
+<div style="background:#fff; border-radius:12px; padding:24px; 
+            margin-bottom:40px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+  <canvas id="revenueChart" height="90"></canvas>
+</div>
+
+<!-- ORDERS ANALYTICS -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Orders Analytics
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px;">
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+      Orders by Service Type
+    </div>
+    <canvas id="serviceChart" height="200"></canvas>
+  </div>
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+      Orders by Garment Category
+    </div>
+    <canvas id="categoryChart" height="200"></canvas>
+  </div>
+
+</div>
+
+<div style="background:#fff; border-radius:12px; padding:24px; 
+            margin-bottom:40px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+  <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+    Busiest Days of the Week
+  </div>
+  <canvas id="weekdayChart" height="80"></canvas>
+</div>
+
+<!-- PAYMENT ANALYTICS -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Payment Analytics
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px;">
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+      Payment Status Breakdown
+    </div>
+    <canvas id="paymentChart" height="200"></canvas>
+  </div>
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:20px;">
+      Outstanding Balance by Age
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="font-size:13px; font-weight:600; color:#15803d;">0 – 7 Days</span>
+        <span style="font-size:13px; font-weight:700;">KSh {{ outstanding_0_7 }}</span>
+      </div>
+      <div style="background:#f1f5f9; border-radius:4px; height:10px;">
+        <div class="progress-bar" data-width="{% if outstanding_0_7 %}60{% else %}0{% endif %}"
+             style="background:#10b981; border-radius:4px; height:10px; width:0%;
+                    transition:width 0.6s ease;"></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="font-size:13px; font-weight:600; color:#b45309;">7 – 30 Days</span>
+        <span style="font-size:13px; font-weight:700;">KSh {{ outstanding_7_30 }}</span>
+      </div>
+      <div style="background:#f1f5f9; border-radius:4px; height:10px;">
+        <div class="progress-bar" data-width="{% if outstanding_7_30 %}60{% else %}0{% endif %}"
+             style="background:#f59e0b; border-radius:4px; height:10px; width:0%;
+                    transition:width 0.6s ease;"></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span style="font-size:13px; font-weight:600; color:#b91c1c;">30+ Days</span>
+        <span style="font-size:13px; font-weight:700;">KSh {{ outstanding_30_plus }}</span>
+      </div>
+      <div style="background:#f1f5f9; border-radius:4px; height:10px;">
+        <div class="progress-bar" data-width="{% if outstanding_30_plus %}60{% else %}0{% endif %}"
+             style="background:#ef4444; border-radius:4px; height:10px; width:0%;
+                    transition:width 0.6s ease;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT ANALYTICS -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Client Analytics
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px;">
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+      New Clients Per Month
+    </div>
+    <canvas id="newClientsChart" height="200"></canvas>
+  </div>
+
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+      Returning vs New Clients
+    </div>
+    <canvas id="loyaltyChart" height="200"></canvas>
+    <div style="display:flex; justify-content:center; gap:24px; margin-top:16px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:12px; height:12px; border-radius:50%; background:#2563eb;"></div>
+        <span style="font-size:13px;">Returning — {{ returning_clients }}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:12px; height:12px; border-radius:50%; background:#bfdbfe;"></div>
+        <span style="font-size:13px;">New — {{ new_only_clients }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOP 10 CLIENTS -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Top 10 Clients All Time
+  </div>
+</div>
+<div class="table-card" style="margin-bottom:40px;">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Client</th>
+        <th>Phone</th>
+        <th>Total Orders</th>
+        <th>Total Spent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for client in top_10_clients %}
+      <tr>
+        <td>
+          {% if forloop.counter == 1 %}🥇
+          {% elif forloop.counter == 2 %}🥈
+          {% elif forloop.counter == 3 %}🥉
+          {% else %}{{ forloop.counter }}
+          {% endif %}
+        </td>
+        <td><strong>{{ client.full_name }}</strong></td>
+        <td>{{ client.phone_number }}</td>
+        <td>{{ client.order_count }}</td>
+        <td><strong>KSh {{ client.total_spent }}</strong></td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" style="text-align:center; color:#94a3b8; padding:24px;">
+          No client data yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- CHARTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  const revenueLabels = JSON.parse(document.getElementById('revenueLabels').dataset.value);
+  const revenueData = JSON.parse(document.getElementById('revenueData').dataset.value);
+  const serviceLabels = JSON.parse(document.getElementById('serviceLabels').dataset.value);
+  const serviceCounts = JSON.parse(document.getElementById('serviceCounts').dataset.value);
+  const categoryLabels = JSON.parse(document.getElementById('categoryLabels').dataset.value);
+  const categoryCounts = JSON.parse(document.getElementById('categoryCounts').dataset.value);
+  const weekdayLabels = JSON.parse(document.getElementById('weekdayLabels').dataset.value);
+  const weekdayCounts = JSON.parse(document.getElementById('weekdayCounts').dataset.value);
+  const paymentLabels = JSON.parse(document.getElementById('paymentLabels').dataset.value);
+  const paymentCounts = JSON.parse(document.getElementById('paymentCounts').dataset.value);
+  const newClientLabels = JSON.parse(document.getElementById('newClientLabels').dataset.value);
+  const newClientData = JSON.parse(document.getElementById('newClientData').dataset.value);
+  const returningClients = parseFloat(document.getElementById('returningClients').dataset.value);
+  const newOnlyClients = parseFloat(document.getElementById('newOnlyClients').dataset.value);
+
+  // Revenue chart
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: revenueLabels,
+      datasets: [{
+        label: 'Revenue (KSh)',
+        data: revenueData,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#2563eb',
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => 'KSh ' + c.parsed.y.toLocaleString() } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: { callback: val => 'KSh ' + val.toLocaleString() }
+        },
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0 } }
+      }
+    }
+  });
+
+  // Service type donut
+  new Chart(document.getElementById('serviceChart'), {
+    type: 'doughnut',
+    data: {
+      labels: serviceLabels,
+      datasets: [{
+        data: serviceCounts,
+        backgroundColor: ['#2563eb', '#10b981', '#f59e0b'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } },
+      cutout: '65%',
+    }
+  });
+
+  // Category bar chart
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+      labels: categoryLabels,
+      datasets: [{
+        label: 'Items',
+        data: categoryCounts,
+        backgroundColor: '#bfdbfe',
+        borderColor: '#2563eb',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Busiest days bar chart
+  new Chart(document.getElementById('weekdayChart'), {
+    type: 'bar',
+    data: {
+      labels: weekdayLabels,
+      datasets: [{
+        label: 'Orders',
+        data: weekdayCounts,
+        backgroundColor: '#a5f3fc',
+        borderColor: '#0891b2',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Payment status donut
+  new Chart(document.getElementById('paymentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: paymentLabels,
+      datasets: [{
+        data: paymentCounts,
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } },
+      cutout: '65%',
+    }
+  });
+
+  // New clients per month
+  new Chart(document.getElementById('newClientsChart'), {
+    type: 'bar',
+    data: {
+      labels: newClientLabels,
+      datasets: [{
+        label: 'New Clients',
+        data: newClientData,
+        backgroundColor: '#bfdbfe',
+        borderColor: '#2563eb',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Loyalty donut
+  new Chart(document.getElementById('loyaltyChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Returning', 'New'],
+      datasets: [{
+        data: [returningClients, newOnlyClients],
+        backgroundColor: ['#2563eb', '#bfdbfe'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      cutout: '65%',
+    }
+  });
+
+  // Animate progress bars
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const width = bar.getAttribute('data-width');
+    setTimeout(() => { bar.style.width = width + '%'; }, 100);
+  });
+</script>
+
+{% endblock %}

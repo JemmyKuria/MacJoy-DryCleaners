@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block page_title %}Orders{% endblock %}
+{% block content %}
+
+<!-- FILTERS -->
+<div style="background:#fff; border-radius:12px; padding:20px 24px;
+            margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,0.05);
+            display:flex; gap:12px; flex-wrap:wrap; align-items:end;">
+
+  <!-- Search -->
+  <div style="flex:1; min-width:200px;">
+    <label class="form-label">Search</label>
+    <input type="text" id="searchInput" class="form-control"
+           placeholder="Client name or order number..."
+           value="{{ search }}"
+           oninput="applyFilters()"/>
+  </div>
+
+  <!-- Date Filter -->
+  <div>
+    <label class="form-label">Date Range</label>
+    <select id="dateFilter" class="form-control" onchange="applyFilters()">
+      <option value="all" {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
+      <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+      <option value="week" {% if date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
+      <option value="month" {% if date_filter == 'month' %}selected{% endif %}>Last 30 Days</option>
+    </select>
+  </div>
+
+  <!-- Collection Status Filter -->
+  <div>
+    <label class="form-label">Collection Status</label>
+    <select id="statusFilter" class="form-control" onchange="applyFilters()">
+      <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+      <option value="received" {% if status_filter == 'received' %}selected{% endif %}>Received</option>
+      <option value="ready" {% if status_filter == 'ready' %}selected{% endif %}>Ready</option>
+      <option value="collected" {% if status_filter == 'collected' %}selected{% endif %}>Collected</option>
+    </select>
+  </div>
+
+  <!-- Payment Filter -->
+  <div>
+    <label class="form-label">Payment Status</label>
+    <select id="paymentFilter" class="form-control" onchange="applyFilters()">
+      <option value="all" {% if payment_filter == 'all' %}selected{% endif %}>All</option>
+      <option value="paid" {% if payment_filter == 'paid' %}selected{% endif %}>Paid</option>
+      <option value="partial" {% if payment_filter == 'partial' %}selected{% endif %}>Partial</option>
+      <option value="unpaid" {% if payment_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+    </select>
+  </div>
+
+  <!-- Clear -->
+  <div>
+    <a href="{% url 'attendant_orders' %}" class="btn btn-outline">Clear</a>
+  </div>
+
+  <!-- New Order -->
+  <div>
+    <a href="{% url 'new_order' %}" class="btn btn-primary">+ New Order</a>
+  </div>
+
+</div>
+
+<!-- ORDERS TABLE -->
+<div class="table-card">
+  <div class="table-card-header">
+    <div class="table-card-title">Orders</div>
+    <span style="font-size:13px; color:#64748b;">
+      {{ orders|length }} order(s)
+    </span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Order No.</th>
+        <th>Client</th>
+        <th>Service</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Pickup Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>
+            <a href="{% url 'order_detail' order.id %}" 
+                style="color:#1e40af; text-decoration:none; font-weight:700;">
+                {{ order.order_number }}
+            </a>
+            {% if order.is_urgent %}
+            <span class="badge badge-urgent">⚡</span>
+          {% endif %}
+        </td>
+        <td>{{ order.customer.full_name }}</td>
+        <td>{{ order.get_service_type_display }}</td>
+        <td>KSh {{ order.total_price }}</td>
+        <td>
+          <span class="badge badge-{{ order.payment_status }}">
+            {{ order.get_payment_status_display }}
+          </span>
+        </td>
+        <td>
+          <span class="badge badge-{{ order.collection_status }}">
+            {{ order.get_collection_status_display }}
+          </span>
+        </td>
+        <td>{{ order.pickup_date }}</td>
+        <td>
+          <form method="POST" action="{% url 'update_order_status' order.id %}">
+            {% csrf_token %}
+            <select name="collection_status" class="form-control"
+                    style="padding:6px; font-size:12px; width:130px;"
+                    onchange="this.form.submit()">
+              <option value="received" {% if order.collection_status == 'received' %}selected{% endif %}>Received</option>
+              <option value="ready" {% if order.collection_status == 'ready' %}selected{% endif %}>Ready</option>
+              <option value="collected" {% if order.collection_status == 'collected' %}selected{% endif %}>Collected</option>
+            </select>
+          </form>
+          <form method="POST" action="{% url 'update_payment_status' order.id %}" style="margin-top:6px;">
+            {% csrf_token %}
+            <select name="payment_status" class="form-control"
+                    style="padding:6px; font-size:12px; width:130px;"
+                    onchange="this.form.submit()">
+              <option value="unpaid" {% if order.payment_status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+              <option value="partial" {% if order.payment_status == 'partial' %}selected{% endif %}>Partial</option>
+              <option value="paid" {% if order.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+            </select>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" style="text-align:center; color:#94a3b8; padding:40px;">
+          No orders found.
+          <a href="{% url 'new_order' %}">Create the first order →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value;
+    const date = document.getElementById('dateFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const payment = document.getElementById('paymentFilter').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', search);
+    url.searchParams.set('date_filter', date);
+    url.searchParams.set('status_filter', status);
+    url.searchParams.set('payment_filter', payment);
+    window.location.href = url.toString();
+  }
+</script>
+
+{% endblock %}

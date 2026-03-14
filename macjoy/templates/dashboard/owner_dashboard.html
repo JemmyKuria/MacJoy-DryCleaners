@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% block page_title %}Owner Dashboard{% endblock %}
+{% block content %}
+
+<!-- DATA FOR CHARTS -->
+<span id="chartLabels" data-value="{{ chart_labels|safe }}" style="display:none;"></span>
+<span id="chartData" data-value="{{ chart_data|safe }}" style="display:none;"></span>
+<span id="returningRatio" data-value="{{ returning_ratio }}" style="display:none;"></span>
+<span id="newClientsRatio" data-value="{{ new_clients_ratio }}" style="display:none;"></span>
+
+<!-- ROW 1: TODAY'S SNAPSHOT -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Today's Snapshot
+  </div>
+</div>
+<div class="stat-cards" style="margin-bottom:32px;">
+  <div class="stat-card">
+    <div class="stat-value">{{ orders_today }}</div>
+    <div class="stat-label">Orders Today</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ revenue_today }}</div>
+    <div class="stat-label">Revenue Today KSh</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-value">{{ uncollected }}</div>
+    <div class="stat-label">Ready Not Collected</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-value">{{ outstanding_balance }}</div>
+    <div class="stat-label">Outstanding Balance KSh</div>
+  </div>
+</div>
+
+<!-- ROW 2: REVENUE CHART -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Revenue Trend — Last 30 Days
+  </div>
+</div>
+<div style="background:#fff; border-radius:12px; padding:24px; 
+            margin-bottom:32px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+  <canvas id="revenueChart" height="80"></canvas>
+</div>
+
+<!-- ROW 3: THIS MONTH VS LAST MONTH -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    This Month vs Last Month
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:repeat(3,1fr); 
+            gap:16px; margin-bottom:32px;">
+
+  <!-- Revenue comparison -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
+                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
+      Revenue
+    </div>
+    <div style="font-size:28px; font-weight:700; color:#0f172a; 
+                font-family:'Bebas Neue',sans-serif;">
+      KSh {{ this_month_revenue }}
+    </div>
+    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
+      Last month: KSh {{ last_month_revenue }}
+    </div>
+    <div style="margin-top:10px;">
+      {% if revenue_growth >= 0 %}
+        <span style="color:#15803d; font-weight:700; font-size:14px;">
+          ▲ {{ revenue_growth }}%
+        </span>
+        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
+      {% else %}
+        <span style="color:#b91c1c; font-weight:700; font-size:14px;">
+          ▼ {{ revenue_growth }}%
+        </span>
+        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Orders comparison -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
+                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
+      Orders
+    </div>
+    <div style="font-size:28px; font-weight:700; color:#0f172a; 
+                font-family:'Bebas Neue',sans-serif;">
+      {{ this_month_order_count }}
+    </div>
+    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
+      Last month: {{ last_month_order_count }}
+    </div>
+    <div style="margin-top:10px;">
+      {% if orders_growth >= 0 %}
+        <span style="color:#15803d; font-weight:700; font-size:14px;">
+          ▲ {{ orders_growth }}%
+        </span>
+        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
+      {% else %}
+        <span style="color:#b91c1c; font-weight:700; font-size:14px;">
+          ▼ {{ orders_growth }}%
+        </span>
+        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- New clients -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
+                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
+      New Clients
+    </div>
+    <div style="font-size:28px; font-weight:700; color:#0f172a; 
+                font-family:'Bebas Neue',sans-serif;">
+      {{ new_clients_this_month }}
+    </div>
+    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
+      Total clients: {{ total_clients }}
+    </div>
+    <div style="margin-top:10px;">
+      <span style="color:#2563eb; font-weight:700; font-size:14px;">
+        {{ new_clients_ratio }}%
+      </span>
+      <span style="color:#94a3b8; font-size:12px;"> are new this month</span>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 4: SERVICE & CATEGORY BREAKDOWN -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Service & Category Breakdown
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; 
+            gap:16px; margin-bottom:32px;">
+
+  <!-- Service breakdown -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; 
+                margin-bottom:16px;">
+      Services
+    </div>
+    {% for service in service_breakdown %}
+    <div style="margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; 
+                  margin-bottom:6px;">
+        <span style="font-size:13px; font-weight:600;">
+          {{ service.service_type|title }}
+        </span>
+        <span style="font-size:13px; color:#64748b;">
+          {{ service.count }} orders · KSh {{ service.revenue }}
+        </span>
+      </div>
+      <div style="background:#f1f5f9; border-radius:4px; height:8px;">
+        <div class="progress-bar" data-width="{{ service.percentage }}"
+             style="background:#2563eb; border-radius:4px; height:8px; 
+                    width:0%; transition:width 0.6s ease;"></div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:#94a3b8; font-size:13px;">No data yet.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Category breakdown -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; 
+                margin-bottom:16px;">
+      Garment Categories
+    </div>
+    {% for cat in categories %}
+    <div style="margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; 
+                  margin-bottom:6px;">
+        <span style="font-size:13px; font-weight:600;">
+          {{ cat.category|title }}
+        </span>
+        <span style="font-size:13px; color:#64748b;">
+          {{ cat.count }} items
+        </span>
+      </div>
+      <div style="background:#f1f5f9; border-radius:4px; height:8px;">
+        <div class="progress-bar" data-width="{{ cat.percentage }}"
+             style="background:#10b981; border-radius:4px; height:8px; 
+                    width:0%; transition:width 0.6s ease;"></div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:#94a3b8; font-size:13px;">No item data yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ROW 5: CLIENT INTELLIGENCE -->
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    Client Intelligence
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:2fr 1fr; 
+            gap:16px; margin-bottom:32px;">
+
+  <!-- Top clients -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">Top 5 Clients by Spending</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Client</th>
+          <th>Phone</th>
+          <th>Orders</th>
+          <th>Total Spent</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in top_clients %}
+        <tr>
+          <td>
+            {% if forloop.counter == 1 %}🥇
+            {% elif forloop.counter == 2 %}🥈
+            {% elif forloop.counter == 3 %}🥉
+            {% else %}{{ forloop.counter }}
+            {% endif %}
+          </td>
+          <td><strong>{{ client.full_name }}</strong></td>
+          <td>{{ client.phone_number }}</td>
+          <td>{{ client.order_count }}</td>
+          <td><strong>KSh {{ client.total_spent }}</strong></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center; color:#94a3b8; padding:24px;">
+            No data yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Returning vs new -->
+  <div style="background:#fff; border-radius:12px; padding:24px; 
+              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+    <div style="font-size:14px; font-weight:700; color:#0f172a; 
+                margin-bottom:20px;">
+      Client Loyalty
+    </div>
+    <div style="text-align:center; margin-bottom:20px;">
+      <canvas id="loyaltyChart" width="160" height="160"></canvas>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:12px; height:12px; border-radius:50%; 
+                    background:#2563eb;"></div>
+        <span style="font-size:13px;">Returning — {{ returning_ratio }}%</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:12px; height:12px; border-radius:50%; 
+                    background:#bfdbfe;"></div>
+        <span style="font-size:13px;">New — {{ new_clients_ratio }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 6: ALERTS -->
+{% if urgent_uncollected or overdue_orders or old_unpaid %}
+<div style="margin-bottom:8px;">
+  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
+              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
+    ⚠️ Alerts
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:repeat(3,1fr); 
+            gap:16px; margin-bottom:32px;">
+
+  {% if urgent_uncollected %}
+  <div style="background:#fef2f2; border:1px solid #fecaca; 
+              border-radius:12px; padding:20px;">
+    <div style="font-size:13px; font-weight:700; color:#b91c1c; 
+                margin-bottom:12px;">
+      ⚡ Urgent Not Collected
+    </div>
+    {% for order in urgent_uncollected %}
+    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
+                border-bottom:1px solid #fecaca;">
+      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if overdue_orders %}
+  <div style="background:#fffbeb; border:1px solid #fde68a; 
+              border-radius:12px; padding:20px;">
+    <div style="font-size:13px; font-weight:700; color:#b45309; 
+                margin-bottom:12px;">
+      📅 Overdue Orders
+    </div>
+    {% for order in overdue_orders %}
+    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
+                border-bottom:1px solid #fde68a;">
+      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
+      <span style="color:#b45309;">· due {{ order.pickup_date }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if old_unpaid %}
+  <div style="background:#fef2f2; border:1px solid #fecaca; 
+              border-radius:12px; padding:20px;">
+    <div style="font-size:13px; font-weight:700; color:#b91c1c; 
+                margin-bottom:12px;">
+      💸 Unpaid Over 7 Days
+    </div>
+    {% for order in old_unpaid %}
+    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
+                border-bottom:1px solid #fecaca;">
+      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
+      <span style="color:#b91c1c;">· KSh {{ order.total_price }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endif %}
+
+<!-- CHARTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  const chartLabels = JSON.parse(document.getElementById('chartLabels').dataset.value);
+  const chartData = JSON.parse(document.getElementById('chartData').dataset.value);
+  const returningRatio = parseFloat(document.getElementById('returningRatio').dataset.value);
+  const newClientsRatio = parseFloat(document.getElementById('newClientsRatio').dataset.value);
+
+  // Revenue chart
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Revenue (KSh)',
+        data: chartData,
+        backgroundColor: '#bfdbfe',
+        borderColor: '#2563eb',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => 'KSh ' + c.parsed.y.toLocaleString()
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            callback: val => 'KSh ' + val.toLocaleString()
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            maxTicksLimit: 10,
+            maxRotation: 0,
+          }
+        }
+      }
+    }
+  });
+
+  // Loyalty donut chart
+  const ctx2 = document.getElementById('loyaltyChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Returning', 'New'],
+      datasets: [{
+        data: [returningRatio, newClientsRatio],
+        backgroundColor: ['#2563eb', '#bfdbfe'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false } },
+      cutout: '70%',
+    }
+  });
+
+  // Animate progress bars
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const width = bar.getAttribute('data-width');
+    setTimeout(() => { bar.style.width = width + '%'; }, 100);
+  });
+</script>
+
+{% endblock %}

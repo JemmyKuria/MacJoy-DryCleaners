@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% block page_title %}New Order{% endblock %}
+{% block content %}
+
+<div class="form-card">
+  <form method="POST" id="orderForm">
+    {% csrf_token %}
+
+    <!-- CUSTOMER SECTION -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:13px; font-weight:700; text-transform:uppercase; 
+                  letter-spacing:1px; color:#1e40af; margin-bottom:16px; 
+                  padding-bottom:8px; border-bottom:2px solid #eff6ff;">
+        👤 Customer Details
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="text" name="phone_number" id="phone_number" 
+                 class="form-control" placeholder="e.g. 0712345678" 
+                 required oninput="searchCustomer(this.value)"/>
+          <div id="customer_status" style="font-size:12px; margin-top:6px;"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="full_name" id="full_name" 
+                 class="form-control" placeholder="Customer full name" required/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER SECTION -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:13px; font-weight:700; text-transform:uppercase; 
+                  letter-spacing:1px; color:#1e40af; margin-bottom:16px; 
+                  padding-bottom:8px; border-bottom:2px solid #eff6ff;">
+        📋 Order Details
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Order Type *</label>
+          <select name="order_type" id="order_type" class="form-control" 
+                  onchange="toggleOrderType(this.value)" required>
+            <option value="">Select type...</option>
+            <option value="basket">🧺 Basket</option>
+            <option value="single_item">👔 Single Item</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service Type *</label>
+          <select name="service_type" class="form-control" required>
+            <option value="">Select service...</option>
+            <option value="laundry">Laundry Only</option>
+            <option value="pressing">Pressing Only</option>
+            <option value="both">Laundry & Pressing</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SINGLE ITEM SECTION -->
+      <div id="single_item_section" style="display:none; margin-bottom:16px;">
+        <div style="font-size:12px; font-weight:600; color:#64748b; 
+                    text-transform:uppercase; letter-spacing:1px; 
+                    margin-bottom:12px;">
+          Items
+        </div>
+        <div id="items_container"></div>
+        <button type="button" onclick="addItem()" class="btn btn-outline" 
+                style="margin-top:8px; font-size:12px; padding:8px 16px;">
+          + Add Item
+        </button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Total Price (KSh) *</label>
+          <input type="number" name="total_price" id="total_price" 
+                 class="form-control" placeholder="0.00" 
+                 step="0.01" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Paid (KSh)</label>
+          <input type="number" name="amount_paid" id="amount_paid" 
+                 class="form-control" placeholder="0.00" 
+                 step="0.01" value="0" 
+                 oninput="updatePaymentStatus()"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Payment Status *</label>
+          <select name="payment_status" id="payment_status" 
+                  class="form-control" required>
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partially Paid</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pickup Date *</label>
+          <input type="date" name="pickup_date" class="form-control" required/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" name="notes" class="form-control" 
+                 placeholder="e.g. stained collar, client aware"/>
+        </div>
+        <div class="form-group" style="display:flex; align-items:center; 
+                                        padding-top:28px;">
+          <label style="display:flex; align-items:center; gap:10px; 
+                         cursor:pointer; font-size:14px; font-weight:500;">
+            <input type="checkbox" name="is_urgent" 
+                   style="width:18px; height:18px; accent-color:#ef4444;"/>
+            <span>⚡ Mark as Urgent</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" 
+            style="width:100%; padding:14px; font-size:15px;">
+      Submit Order →
+    </button>
+  </form>
+</div>
+
+<script>
+  // Search customer by phone
+  let searchTimeout;
+  function searchCustomer(phone) {
+    clearTimeout(searchTimeout);
+    if (phone.length < 10) return;
+    searchTimeout = setTimeout(() => {
+      fetch(`/orders/search-customer/?phone=${phone}`)
+        .then(res => res.json())
+        .then(data => {
+          const status = document.getElementById('customer_status');
+          const nameField = document.getElementById('full_name');
+          if (data.found) {
+            nameField.value = data.full_name;
+            status.innerHTML = `<span style="color:#15803d;">✓ Returning customer — ${data.total_visits} visit(s)</span>`;
+          } else {
+            nameField.value = '';
+            status.innerHTML = `<span style="color:#2563eb;">✦ New customer</span>`;
+          }
+        });
+    }, 500);
+  }
+
+  // Toggle single item section
+  function toggleOrderType(value) {
+    const section = document.getElementById('single_item_section');
+    if (value === 'single_item') {
+      section.style.display = 'block';
+      if (document.getElementById('items_container').children.length === 0) {
+        addItem();
+      }
+    } else {
+      section.style.display = 'none';
+    }
+  }
+
+  // Add item row
+  let itemCount = 0;
+  function addItem() {
+    itemCount++;
+    const container = document.getElementById('items_container');
+    const div = document.createElement('div');
+    div.id = `item_${itemCount}`;
+    div.style.cssText = 'background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:12px;';
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; 
+                  align-items:center; margin-bottom:12px;">
+        <span style="font-size:12px; font-weight:600; color:#64748b;">
+          Item ${itemCount}
+        </span>
+        <button type="button" onclick="removeItem(${itemCount})" 
+                style="background:none; border:none; color:#ef4444; 
+                       cursor:pointer; font-size:13px;">✕ Remove</button>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="form-label">Item Name</label>
+          <input type="text" name="item_name" class="form-control" 
+                 placeholder="e.g. Suit, Dress, Gown" required/>
+        </div>
+        <div>
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control" required>
+            <option value="corporate">Corporate</option>
+            <option value="event">Event</option>
+            <option value="graduation">Graduation</option>
+            <option value="choir">Choir</option>
+            <option value="military">Military</option>
+            <option value="regular">Regular</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Description</label>
+          <input type="text" name="description" class="form-control" 
+                 placeholder="e.g. brown color, stained collar"/>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>
+            <label class="form-label">Qty</label>
+            <input type="number" name="quantity" class="form-control" 
+                   value="1" min="1"/>
+          </div>
+          <div>
+            <label class="form-label">Price (KSh)</label>
+            <input type="number" name="unit_price" class="form-control" 
+                   placeholder="0.00" step="0.01" 
+                   oninput="calculateTotal()"/>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  function removeItem(id) {
+    document.getElementById(`item_${id}`).remove();
+    calculateTotal();
+  }
+
+  // Auto calculate total from items
+  function calculateTotal() {
+    const prices = document.querySelectorAll('input[name="unit_price"]');
+    const quantities = document.querySelectorAll('input[name="quantity"]');
+    let total = 0;
+    prices.forEach((price, i) => {
+      total += (parseFloat(price.value) || 0) * (parseInt(quantities[i]?.value) || 1);
+    });
+    if (total > 0) document.getElementById('total_price').value = total.toFixed(2);
+  }
+
+  // Auto update payment status
+  function updatePaymentStatus() {
+    const total = parseFloat(document.getElementById('total_price').value) || 0;
+    const paid = parseFloat(document.getElementById('amount_paid').value) || 0;
+    const status = document.getElementById('payment_status');
+    if (paid <= 0) status.value = 'unpaid';
+    else if (paid >= total) status.value = 'paid';
+    else status.value = 'partial';
+  }
+</script>
+
+{% endblock %}

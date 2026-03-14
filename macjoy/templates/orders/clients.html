@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block page_title %}Clients{% endblock %}
+{% block content %}
+
+<!-- SEARCH -->
+<div style="margin-bottom:24px;">
+  <input type="text" id="searchInput" class="form-control" 
+         placeholder="🔍 Search by name or phone number..."
+         style="max-width:400px;"
+         oninput="searchClients(this.value)"/>
+</div>
+
+<!-- CLIENTS TABLE -->
+<div class="table-card">
+  <div class="table-card-header">
+    <div class="table-card-title">All Clients</div>
+    <span style="font-size:13px; color:#64748b;">
+      {{ customers|length }} client(s) total
+    </span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Total Visits</th>
+        <th>First Visit</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="clients_body">
+      {% for customer in customers %}
+      <tr class="client-row">
+        <td><strong>{{ customer.full_name }}</strong></td>
+        <td>{{ customer.phone_number }}</td>
+        <td>
+          <span style="background:#eff6ff; color:#1d4ed8; padding:3px 10px; 
+                       border-radius:20px; font-size:12px; font-weight:600;">
+            {{ customer.total_visits }} visit(s)
+          </span>
+        </td>
+        <td>{{ customer.created_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="{% url 'client_detail' customer.id %}" 
+             class="btn btn-outline" 
+             style="font-size:12px; padding:6px 14px;">
+            View Orders
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" style="text-align:center; color:#94a3b8; padding:40px;">
+          No clients yet. They will appear here once orders are created.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function searchClients(query) {
+    const rows = document.querySelectorAll('.client-row');
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+    });
+  }
+</script>
+
+{% endblock %}
