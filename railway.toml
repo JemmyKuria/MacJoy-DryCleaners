@@ -1,0 +1,22 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "cd macjoy && gunicorn macjoy.wsgi --log-file -"
+```
+
+**2. Make sure `requirements.txt` is also inside `macjoy/`** alongside `manage.py`.
+
+So your final structure should be:
+```
+MAC_JOY_DRYCLEANERS/        ← repo root
+├── railway.toml            ← ADD THIS at root
+└── macjoy/
+    ├── manage.py
+    ├── Procfile            ← MOVE HERE
+    ├── requirements.txt    ← MOVE HERE
+    ├── runtime.txt         ← ADD HERE
+    ├── macjoy/
+    ├── accounts/
+    ├── orders/
+    └── ...
