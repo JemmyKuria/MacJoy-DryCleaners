@@ -2,6 +2,28 @@
 {% block page_title %}Orders{% endblock %}
 {% block content %}
 
+<style>
+  .content { overflow-x: hidden; }
+
+  .table-card { overflow: hidden; }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tighten up the table columns */
+  .orders-table th,
+  .orders-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .orders-table th { padding: 8px 12px; }
+</style>
+
 <!-- REVENUE SUMMARY CARDS -->
 <div class="stat-cards" style="margin-bottom:24px;">
   <div class="stat-card">
@@ -26,39 +48,31 @@
 <div style="background:#fff; border-radius:12px; padding:20px 24px;
             margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,0.05);
             display:flex; gap:12px; flex-wrap:wrap; align-items:end;">
-
-  <!-- Search -->
-  <div style="flex:1; min-width:200px;">
+  <div style="flex:1; min-width:180px;">
     <label class="form-label">Search</label>
     <input type="text" id="searchInput" class="form-control"
            placeholder="Client name or order number..."
            value="{{ search }}"
            oninput="applyFilters()"/>
   </div>
-
-  <!-- Date Filter -->
   <div>
     <label class="form-label">Date Range</label>
     <select id="dateFilter" class="form-control" onchange="applyFilters()">
-      <option value="all" {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
+      <option value="all"   {% if date_filter == 'all' %}selected{% endif %}>All Time</option>
       <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
-      <option value="week" {% if date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
+      <option value="week"  {% if date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
       <option value="month" {% if date_filter == 'month' %}selected{% endif %}>Last 30 Days</option>
     </select>
   </div>
-
-  <!-- Payment Filter -->
   <div>
     <label class="form-label">Payment Status</label>
     <select id="paymentFilter" class="form-control" onchange="applyFilters()">
-      <option value="all" {% if payment_filter == 'all' %}selected{% endif %}>All</option>
-      <option value="paid" {% if payment_filter == 'paid' %}selected{% endif %}>Paid</option>
+      <option value="all"     {% if payment_filter == 'all' %}selected{% endif %}>All</option>
+      <option value="paid"    {% if payment_filter == 'paid' %}selected{% endif %}>Paid</option>
       <option value="partial" {% if payment_filter == 'partial' %}selected{% endif %}>Partial</option>
-      <option value="unpaid" {% if payment_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+      <option value="unpaid"  {% if payment_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
     </select>
   </div>
-
-  <!-- Clear -->
   <div>
     <a href="{% url 'owner_orders' %}" class="btn btn-outline">Clear Filters</a>
   </div>
@@ -68,69 +82,67 @@
 <div class="table-card">
   <div class="table-card-header">
     <div class="table-card-title">All Orders</div>
-    <span style="font-size:13px; color:#64748b;">
-      {{ orders|length }} order(s)
-    </span>
+    <span style="font-size:13px; color:#64748b;">{{ orders|length }} order(s)</span>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Order No.</th>
-        <th>Client</th>
-        <th>Service</th>
-        <th>Order Type</th>
-        <th>Total</th>
-        <th>Paid</th>
-        <th>Payment</th>
-        <th>Status</th>
-        <th>Date</th>
-        <th>Pickup</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for order in orders %}
-      <tr>
-        <td>
-          <strong>{{ order.order_number }}</strong>
-          {% if order.is_urgent %}
-            <span class="badge badge-urgent">⚡</span>
-          {% endif %}
-        </td>
-        <td>{{ order.customer.full_name }}</td>
-        <td>{{ order.get_service_type_display }}</td>
-        <td>{{ order.get_order_type_display }}</td>
-        <td><strong>KSh {{ order.total_price }}</strong></td>
-        <td>KSh {{ order.amount_paid }}</td>
-        <td>
-          <span class="badge badge-{{ order.payment_status }}">
-            {{ order.get_payment_status_display }}
-          </span>
-        </td>
-        <td>
-          <span class="badge badge-{{ order.collection_status }}">
-            {{ order.get_collection_status_display }}
-          </span>
-        </td>
-        <td>{{ order.created_at|date:"M d, Y" }}</td>
-        <td>{{ order.pickup_date }}</td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="11" style="text-align:center; color:#94a3b8; padding:40px;">
-          No orders found for the selected filters.
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-responsive">
+    <table class="orders-table" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>Order No.</th>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Type</th>
+          <th>Total</th>
+          <th>Paid</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <!-- <th>Date</th> -->
+          <th>Pickup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>
+            <strong>{{ order.order_number }}</strong>
+            {% if order.is_urgent %}<span class="badge badge-urgent">⚡</span>{% endif %}
+          </td>
+          <td>{{ order.customer.full_name }}</td>
+          <td>{{ order.get_service_type_display }}</td>
+          <td>{{ order.get_order_type_display }}</td>
+          <td><strong>KSh {{ order.total_price }}</strong></td>
+          <td>KSh {{ order.amount_paid }}</td>
+          <td>
+            <span class="badge badge-{{ order.payment_status }}">
+              {{ order.get_payment_status_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-{{ order.collection_status }}">
+              {{ order.get_collection_status_display }}
+            </span>
+          </td>
+          <!-- <td>{{ order.created_at|date:"M d, Y" }}</td> -->
+          <td>{{ order.pickup_date }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10" style="text-align:center; color:#94a3b8; padding:40px;">
+            No orders found for the selected filters.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
   function applyFilters() {
-    const search = document.getElementById('searchInput').value;
-    const date = document.getElementById('dateFilter').value;
+    const search  = document.getElementById('searchInput').value;
+    const date    = document.getElementById('dateFilter').value;
     const payment = document.getElementById('paymentFilter').value;
-    const url = new URL(window.location.href);
+    const url     = new URL(window.location.href);
     url.searchParams.set('search', search);
     url.searchParams.set('date_filter', date);
     url.searchParams.set('payment_filter', payment);

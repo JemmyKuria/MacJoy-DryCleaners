@@ -1,426 +1,936 @@
 {% extends 'base.html' %}
-{% block page_title %}Owner Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_crumb %}/ Owner Overview{% endblock %}
+
+{% block topbar_action %}
+
+{% endblock %}
+
 {% block content %}
 
-<!-- DATA FOR CHARTS -->
-<span id="chartLabels" data-value="{{ chart_labels|safe }}" style="display:none;"></span>
-<span id="chartData" data-value="{{ chart_data|safe }}" style="display:none;"></span>
-<span id="returningRatio" data-value="{{ returning_ratio }}" style="display:none;"></span>
-<span id="newClientsRatio" data-value="{{ new_clients_ratio }}" style="display:none;"></span>
+<span id="dChartLabels"    data-value="{{ chart_labels|safe }}"  style="display:none;"></span>
+<span id="dChartData"      data-value="{{ chart_data|safe }}"    style="display:none;"></span>
+<span id="dReturning"      data-value="{{ returning_ratio }}"    style="display:none;"></span>
+<span id="dNewClients"     data-value="{{ new_clients_ratio }}"  style="display:none;"></span>
 
-<!-- ROW 1: TODAY'S SNAPSHOT -->
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    Today's Snapshot
-  </div>
-</div>
-<div class="stat-cards" style="margin-bottom:32px;">
-  <div class="stat-card">
-    <div class="stat-value">{{ orders_today }}</div>
-    <div class="stat-label">Orders Today</div>
-  </div>
-  <div class="stat-card green">
-    <div class="stat-value">{{ revenue_today }}</div>
-    <div class="stat-label">Revenue Today KSh</div>
-  </div>
-  <div class="stat-card amber">
-    <div class="stat-value">{{ uncollected }}</div>
-    <div class="stat-label">Ready Not Collected</div>
-  </div>
-  <div class="stat-card red">
-    <div class="stat-value">{{ outstanding_balance }}</div>
-    <div class="stat-label">Outstanding Balance KSh</div>
-  </div>
-</div>
+<style>
+/* ─────────────────────────────────────────────────────
+   RESET CONTENT AREA — full bleed, no scroll
+───────────────────────────────────────────────────── */
+.content {
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 57px);
+}
 
-<!-- ROW 2: REVENUE CHART -->
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    Revenue Trend — Last 30 Days
-  </div>
-</div>
-<div style="background:#fff; border-radius:12px; padding:24px; 
-            margin-bottom:32px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-  <canvas id="revenueChart" height="80"></canvas>
-</div>
+/* ─────────────────────────────────────────────────────
+   TYPOGRAPHY TOKENS
+───────────────────────────────────────────────────── */
+.lbl {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
 
-<!-- ROW 3: THIS MONTH VS LAST MONTH -->
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    This Month vs Last Month
-  </div>
-</div>
-<div style="display:grid; grid-template-columns:repeat(3,1fr); 
-            gap:16px; margin-bottom:32px;">
+/* ─────────────────────────────────────────────────────
+   OUTER SHELL — two horizontal bands
+   Band A (top): stat row + KPIs sidebar
+   Band B (bot): chart + breakdown + clients + alerts
+───────────────────────────────────────────────────── */
+.db-shell {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 130px 1fr;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  overflow: hidden;
+  min-height: 0;
+}
 
-  <!-- Revenue comparison -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
-                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
-      Revenue
+/* ─────────────────────────────────────────────────────
+   BAND A — stat strip
+───────────────────────────────────────────────────── */
+.band-a {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+}
+
+.kpi {
+  background: var(--white);
+  padding: 18px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+.kpi:hover { background: var(--sky-pale); }
+
+.kpi-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi.k-blue  .kpi-accent { background: linear-gradient(90deg, #42A5F5, #1565C0); }
+.kpi.k-green .kpi-accent { background: linear-gradient(90deg, #4ADE80, #16A34A); }
+.kpi.k-amber .kpi-accent { background: linear-gradient(90deg, #FCD34D, #D97706); }
+.kpi.k-red   .kpi-accent { background: linear-gradient(90deg, #FCA5A5, #DC2626); }
+
+.kpi-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.kpi.k-blue  .kpi-value { color: var(--sky-deep); }
+.kpi.k-green .kpi-value { color: #166534; }
+.kpi.k-amber .kpi-value { color: #92400E; }
+.kpi.k-red   .kpi-value { color: #991B1B; }
+
+.kpi-sub {
+  font-size: 0.68rem;
+  color: var(--steel);
+  margin-top: 4px;
+}
+
+.kpi-watermark {
+  position: absolute;
+  right: 10px;
+  bottom: -8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 5.5rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.03;
+  color: var(--sky-ink);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   BAND B — main content area
+───────────────────────────────────────────────────── */
+.band-b {
+  display: grid;
+  /* LEFT: chart area; MID: breakdown cols; RIGHT: clients+alerts */
+  grid-template-columns: 2fr 1.1fr 1.6fr;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── LEFT: chart + comparison stacked ── */
+.col-left {
+  display: grid;
+  grid-template-rows: 1fr 110px;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  min-height: 0;
+}
+
+/* ── MID: services + categories stacked ── */
+.col-mid {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  min-height: 0;
+}
+
+/* ── RIGHT: clients table + loyalty + alerts stacked ── */
+.col-right {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  min-height: 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   PANEL — generic white box
+───────────────────────────────────────────────────── */
+.panel {
+  background: var(--white);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   CHART PANEL
+───────────────────────────────────────────────────── */
+.chart-canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+.chart-canvas-wrap canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ─────────────────────────────────────────────────────
+   COMPARISON ROW — horizontal 3-col
+───────────────────────────────────────────────────── */
+.cmp-row {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  min-height: 0;
+}
+
+.cmp-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 14px;
+  border-right: 1px solid var(--line);
+}
+.cmp-item:first-child { padding-left: 0; }
+.cmp-item:last-child { border-right: none; }
+
+.cmp-title {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-bottom: 2px;
+}
+
+.cmp-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--sky-ink);
+  line-height: 1.1;
+}
+
+.cmp-prev { font-size: 0.62rem; color: var(--steel); margin-top: 1px; }
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 3px;
+  padding: 2px 6px;
+  border-radius: 100px;
+}
+.delta.up   { background: #DCFCE7; color: #166534; }
+.delta.down { background: #FEE2E2; color: #991B1B; }
+.delta.info { background: var(--sky-soft); color: var(--sky-deep); }
+
+/* ─────────────────────────────────────────────────────
+   PROGRESS BREAKDOWN
+───────────────────────────────────────────────────── */
+.prog-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: none;
+}
+.prog-scroll::-webkit-scrollbar { display: none; }
+
+.prog-item { margin-bottom: 11px; }
+.prog-item:last-child { margin-bottom: 0; }
+
+.prog-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+.prog-name {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--sky-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+
+.prog-meta { font-size: 0.66rem; color: var(--steel); white-space: nowrap; }
+
+.prog-track {
+  height: 5px;
+  background: var(--sky-pale);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.prog-fill {
+  height: 5px;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────────────────
+   CLIENTS TABLE
+───────────────────────────────────────────────────── */
+.tbl-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sky-soft) transparent;
+}
+.tbl-scroll::-webkit-scrollbar { width: 4px; }
+.tbl-scroll::-webkit-scrollbar-track { background: transparent; }
+.tbl-scroll::-webkit-scrollbar-thumb { background: var(--sky-soft); border-radius: 4px; }
+
+.dtbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dtbl thead th {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--steel);
+  background: var(--sky-pale);
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.dtbl tbody td {
+  padding: 7px 10px;
+  font-size: 0.74rem;
+  color: var(--sky-ink);
+  border-bottom: 1px solid rgba(21,101,192,0.05);
+  white-space: nowrap;
+}
+
+.dtbl tbody tr:last-child td { border-bottom: none; }
+.dtbl tbody tr:hover td { background: #F0F7FF; }
+
+.td-mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--slate);
+}
+
+.td-amount {
+  font-weight: 700;
+  color: var(--sky-deep);
+}
+
+/* ─────────────────────────────────────────────────────
+   LOYALTY + ALERTS PANEL (split 50/50 horizontally)
+───────────────────────────────────────────────────── */
+.loyalty-alerts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(21,101,192,0.08);
+  min-height: 0;
+}
+
+.loyalty-panel {
+  background: var(--white);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.donut-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donut-pct {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sky-deep);
+  line-height: 1;
+}
+
+.donut-tag {
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.leg { display: flex; flex-direction: column; gap: 5px; }
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.7rem;
+  color: var(--sky-ink);
+}
+.leg-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   ALERTS PANEL
+───────────────────────────────────────────────────── */
+.alerts-panel {
+  background: var(--white);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.alerts-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: none;
+}
+.alerts-scroll::-webkit-scrollbar { display: none; }
+
+.alert-group { margin-bottom: 10px; }
+.alert-group:last-child { margin-bottom: 0; }
+
+.alert-group-head {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding-bottom: 5px;
+  border-bottom: 1px solid;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.alert-group.a-red   .alert-group-head { color: #991B1B; border-color: #FECACA; }
+.alert-group.a-amber .alert-group-head { color: #92400E; border-color: #FDE68A; }
+
+.alert-entry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(21,101,192,0.05);
+  gap: 6px;
+}
+.alert-entry:last-child { border-bottom: none; }
+
+.alert-left { display: flex; flex-direction: column; gap: 1px; }
+.alert-num  { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--slate); }
+.alert-name { font-size: 0.7rem; font-weight: 600; color: var(--sky-ink); }
+.alert-meta { font-size: 0.62rem; color: var(--steel); }
+.alert-right { font-size: 0.68rem; font-weight: 700; color: #991B1B; white-space: nowrap; }
+
+.all-clear {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.all-clear-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.all-clear span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+/* ─────────────────────────────────────────────────────
+   PANEL HEADER DIVIDER
+───────────────────────────────────────────────────── */
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+.panel-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.panel-count {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--sky-base);
+  background: var(--sky-soft);
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     DASHBOARD SHELL
+══════════════════════════════════════════════════════ -->
+<div class="db-shell">
+
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║  BAND A — KPI STRIP                              ║
+       ╚══════════════════════════════════════════════════╝ -->
+  <div class="band-a">
+
+    <div class="kpi k-blue">
+      <div class="kpi-accent"></div>
+      <div class="kpi-label">Orders Today</div>
+      <div class="kpi-value">{{ orders_today }}</div>
+      <div class="kpi-sub">Active orders placed today</div>
+      <div class="kpi-watermark">{{ orders_today }}</div>
     </div>
-    <div style="font-size:28px; font-weight:700; color:#0f172a; 
-                font-family:'Bebas Neue',sans-serif;">
-      KSh {{ this_month_revenue }}
+
+    <div class="kpi k-green">
+      <div class="kpi-accent"></div>
+      <div class="kpi-label">Revenue Today · KSh</div>
+      <div class="kpi-value">{{ revenue_today }}</div>
+      <div class="kpi-sub">Cash collected today</div>
+      <div class="kpi-watermark">{{ revenue_today }}</div>
     </div>
-    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
-      Last month: KSh {{ last_month_revenue }}
+
+    <div class="kpi k-amber">
+      <div class="kpi-accent"></div>
+      <div class="kpi-label">Ready Not Collected</div>
+      <div class="kpi-value">{{ uncollected }}</div>
+      <div class="kpi-sub">Orders awaiting pickup</div>
+      <div class="kpi-watermark">{{ uncollected }}</div>
     </div>
-    <div style="margin-top:10px;">
-      {% if revenue_growth >= 0 %}
-        <span style="color:#15803d; font-weight:700; font-size:14px;">
-          ▲ {{ revenue_growth }}%
-        </span>
-        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
-      {% else %}
-        <span style="color:#b91c1c; font-weight:700; font-size:14px;">
-          ▼ {{ revenue_growth }}%
-        </span>
-        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
-      {% endif %}
+
+    <div class="kpi k-red">
+      <div class="kpi-accent"></div>
+      <div class="kpi-label">Outstanding Balance · KSh</div>
+      <div class="kpi-value">{{ outstanding_balance }}</div>
+      <div class="kpi-sub">Total unpaid across all orders</div>
+      <div class="kpi-watermark">{{ outstanding_balance }}</div>
     </div>
+
   </div>
 
-  <!-- Orders comparison -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
-                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
-      Orders
-    </div>
-    <div style="font-size:28px; font-weight:700; color:#0f172a; 
-                font-family:'Bebas Neue',sans-serif;">
-      {{ this_month_order_count }}
-    </div>
-    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
-      Last month: {{ last_month_order_count }}
-    </div>
-    <div style="margin-top:10px;">
-      {% if orders_growth >= 0 %}
-        <span style="color:#15803d; font-weight:700; font-size:14px;">
-          ▲ {{ orders_growth }}%
-        </span>
-        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
-      {% else %}
-        <span style="color:#b91c1c; font-weight:700; font-size:14px;">
-          ▼ {{ orders_growth }}%
-        </span>
-        <span style="color:#94a3b8; font-size:12px;"> vs last month</span>
-      {% endif %}
-    </div>
-  </div>
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║  BAND B — MAIN CONTENT                           ║
+       ╚══════════════════════════════════════════════════╝ -->
+  <div class="band-b">
 
-  <!-- New clients -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:12px; color:#64748b; text-transform:uppercase; 
-                letter-spacing:1px; font-weight:600; margin-bottom:12px;">
-      New Clients
-    </div>
-    <div style="font-size:28px; font-weight:700; color:#0f172a; 
-                font-family:'Bebas Neue',sans-serif;">
-      {{ new_clients_this_month }}
-    </div>
-    <div style="font-size:12px; color:#94a3b8; margin-top:4px;">
-      Total clients: {{ total_clients }}
-    </div>
-    <div style="margin-top:10px;">
-      <span style="color:#2563eb; font-weight:700; font-size:14px;">
-        {{ new_clients_ratio }}%
-      </span>
-      <span style="color:#94a3b8; font-size:12px;"> are new this month</span>
-    </div>
-  </div>
-</div>
+    <!-- ── LEFT COLUMN: Chart + Comparison ── -->
+    <div class="col-left">
 
-<!-- ROW 4: SERVICE & CATEGORY BREAKDOWN -->
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    Service & Category Breakdown
-  </div>
-</div>
-<div style="display:grid; grid-template-columns:1fr 1fr; 
-            gap:16px; margin-bottom:32px;">
-
-  <!-- Service breakdown -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:14px; font-weight:700; color:#0f172a; 
-                margin-bottom:16px;">
-      Services
-    </div>
-    {% for service in service_breakdown %}
-    <div style="margin-bottom:14px;">
-      <div style="display:flex; justify-content:space-between; 
-                  margin-bottom:6px;">
-        <span style="font-size:13px; font-weight:600;">
-          {{ service.service_type|title }}
-        </span>
-        <span style="font-size:13px; color:#64748b;">
-          {{ service.count }} orders · KSh {{ service.revenue }}
-        </span>
+      <!-- Revenue chart -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Revenue Trend — Last 30 Days</div>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="revenueChart"></canvas>
+        </div>
       </div>
-      <div style="background:#f1f5f9; border-radius:4px; height:8px;">
-        <div class="progress-bar" data-width="{{ service.percentage }}"
-             style="background:#2563eb; border-radius:4px; height:8px; 
-                    width:0%; transition:width 0.6s ease;"></div>
-      </div>
-    </div>
-    {% empty %}
-    <p style="color:#94a3b8; font-size:13px;">No data yet.</p>
-    {% endfor %}
-  </div>
 
-  <!-- Category breakdown -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:14px; font-weight:700; color:#0f172a; 
-                margin-bottom:16px;">
-      Garment Categories
-    </div>
-    {% for cat in categories %}
-    <div style="margin-bottom:14px;">
-      <div style="display:flex; justify-content:space-between; 
-                  margin-bottom:6px;">
-        <span style="font-size:13px; font-weight:600;">
-          {{ cat.category|title }}
-        </span>
-        <span style="font-size:13px; color:#64748b;">
-          {{ cat.count }} items
-        </span>
-      </div>
-      <div style="background:#f1f5f9; border-radius:4px; height:8px;">
-        <div class="progress-bar" data-width="{{ cat.percentage }}"
-             style="background:#10b981; border-radius:4px; height:8px; 
-                    width:0%; transition:width 0.6s ease;"></div>
-      </div>
-    </div>
-    {% empty %}
-    <p style="color:#94a3b8; font-size:13px;">No item data yet.</p>
-    {% endfor %}
-  </div>
-</div>
+      <!-- Month comparison -->
+      <div class="panel" style="padding: 12px 18px;">
+        <div class="panel-title" style="margin-bottom:8px;">This Month vs Last Month</div>
+        <div class="cmp-row">
 
-<!-- ROW 5: CLIENT INTELLIGENCE -->
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    Client Intelligence
-  </div>
-</div>
-<div style="display:grid; grid-template-columns:2fr 1fr; 
-            gap:16px; margin-bottom:32px;">
+          <div class="cmp-item">
+            <div class="cmp-title">Revenue · KSh</div>
+            <div class="cmp-val">{{ this_month_revenue }}</div>
+            <div class="cmp-prev">Last: {{ last_month_revenue }}</div>
+            <div class="delta {% if revenue_growth >= 0 %}up{% else %}down{% endif %}">
+              {% if revenue_growth >= 0 %}▲{% else %}▼{% endif %} {{ revenue_growth }}%
+            </div>
+          </div>
 
-  <!-- Top clients -->
-  <div class="table-card">
-    <div class="table-card-header">
-      <div class="table-card-title">Top 5 Clients by Spending</div>
+          <div class="cmp-item">
+            <div class="cmp-title">Orders</div>
+            <div class="cmp-val">{{ this_month_order_count }}</div>
+            <div class="cmp-prev">Last: {{ last_month_order_count }}</div>
+            <div class="delta {% if orders_growth >= 0 %}up{% else %}down{% endif %}">
+              {% if orders_growth >= 0 %}▲{% else %}▼{% endif %} {{ orders_growth }}%
+            </div>
+          </div>
+
+          <div class="cmp-item">
+            <div class="cmp-title">New Clients</div>
+            <div class="cmp-val">{{ new_clients_this_month }}</div>
+            <div class="cmp-prev">Total: {{ total_clients }}</div>
+            <div class="delta info">{{ new_clients_ratio }}% new</div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Client</th>
-          <th>Phone</th>
-          <th>Orders</th>
-          <th>Total Spent</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for client in top_clients %}
-        <tr>
-          <td>
-            {% if forloop.counter == 1 %}🥇
-            {% elif forloop.counter == 2 %}🥈
-            {% elif forloop.counter == 3 %}🥉
-            {% else %}{{ forloop.counter }}
+
+    <!-- ── MIDDLE COLUMN: Services + Categories ── -->
+    <div class="col-mid">
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Services</div>
+          <div class="panel-count">{{ service_breakdown|length }}</div>
+        </div>
+        <div class="prog-scroll">
+          {% for svc in service_breakdown %}
+          <div class="prog-item">
+            <div class="prog-top">
+              <span class="prog-name">{{ svc.service_type|title }}</span>
+              <span class="prog-meta">{{ svc.count }} · KSh {{ svc.revenue }}</span>
+            </div>
+            <div class="prog-track">
+              <div class="prog-fill" data-w="{{ svc.percentage }}"
+                   style="background: linear-gradient(90deg, #90CAF9, #1565C0);"></div>
+            </div>
+          </div>
+          {% empty %}
+          <p style="font-size:0.72rem;color:var(--steel);padding-top:8px;">No service data yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Garment Categories</div>
+          <div class="panel-count">{{ categories|length }}</div>
+        </div>
+        <div class="prog-scroll">
+          {% for cat in categories %}
+          <div class="prog-item">
+            <div class="prog-top">
+              <span class="prog-name">{{ cat.category|title }}</span>
+              <span class="prog-meta">{{ cat.count }} items</span>
+            </div>
+            <div class="prog-track">
+              <div class="prog-fill" data-w="{{ cat.percentage }}"
+                   style="background: linear-gradient(90deg, #4ADE80, #16A34A);"></div>
+            </div>
+          </div>
+          {% empty %}
+          <p style="font-size:0.72rem;color:var(--steel);padding-top:8px;">No category data yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT COLUMN: Clients | Loyalty+Alerts ── -->
+    <div class="col-right">
+
+      <!-- Top clients -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Top 5 Clients by Spending</div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="dtbl">
+            <thead>
+              <tr>
+                <th style="width:28px;">#</th>
+                <th>Client</th>
+                <th>Phone</th>
+                <th style="text-align:center;">Orders</th>
+                <th style="text-align:right;">Total Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cl in top_clients %}
+              <tr>
+                <td>
+                  {% if forloop.counter == 1 %}🥇
+                  {% elif forloop.counter == 2 %}🥈
+                  {% elif forloop.counter == 3 %}🥉
+                  {% else %}<span style="color:var(--steel);font-size:0.7rem;">{{ forloop.counter }}</span>
+                  {% endif %}
+                </td>
+                <td><strong>{{ cl.full_name }}</strong></td>
+                <td class="td-mono">{{ cl.phone_number }}</td>
+                <td style="text-align:center;">{{ cl.order_count }}</td>
+                <td class="td-amount" style="text-align:right;">KSh {{ cl.total_spent }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" style="text-align:center;color:var(--steel);padding:20px 0;font-size:0.72rem;">
+                  No client data yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Loyalty + Alerts side by side -->
+      <div class="loyalty-alerts">
+
+        <!-- Donut loyalty -->
+        <div class="loyalty-panel">
+          <div class="lbl" style="align-self:flex-start;margin-bottom:0;">Client Loyalty</div>
+          <div class="donut-wrap">
+            <canvas id="loyaltyChart" width="90" height="90"></canvas>
+            <div class="donut-center">
+              <div class="donut-pct">{{ returning_ratio }}%</div>
+              <div class="donut-tag">Returning</div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#1565C0;"></div>
+              Returning — {{ returning_ratio }}%
+            </div>
+            <div class="leg-item">
+              <div class="leg-dot" style="background:#90CAF9;"></div>
+              New — {{ new_clients_ratio }}%
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alerts-panel">
+          <div class="panel-head">
+            <div class="panel-title">Alerts</div>
+            {% with total_alerts=urgent_uncollected|length|add:overdue_orders|length|add:old_unpaid|length %}
+            {% if total_alerts > 0 %}
+            <div class="panel-count" style="background:#FEE2E2;color:#991B1B;">{{ total_alerts }}</div>
             {% endif %}
-          </td>
-          <td><strong>{{ client.full_name }}</strong></td>
-          <td>{{ client.phone_number }}</td>
-          <td>{{ client.order_count }}</td>
-          <td><strong>KSh {{ client.total_spent }}</strong></td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" style="text-align:center; color:#94a3b8; padding:24px;">
-            No data yet.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+            {% endwith %}
+          </div>
 
-  <!-- Returning vs new -->
-  <div style="background:#fff; border-radius:12px; padding:24px; 
-              box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-    <div style="font-size:14px; font-weight:700; color:#0f172a; 
-                margin-bottom:20px;">
-      Client Loyalty
-    </div>
-    <div style="text-align:center; margin-bottom:20px;">
-      <canvas id="loyaltyChart" width="160" height="160"></canvas>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <div style="width:12px; height:12px; border-radius:50%; 
-                    background:#2563eb;"></div>
-        <span style="font-size:13px;">Returning — {{ returning_ratio }}%</span>
+          {% if urgent_uncollected or overdue_orders or old_unpaid %}
+          <div class="alerts-scroll">
+
+            {% if urgent_uncollected %}
+            <div class="alert-group a-red">
+              <div class="alert-group-head">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Urgent Uncollected
+              </div>
+              {% for o in urgent_uncollected %}
+              <div class="alert-entry">
+                <div class="alert-left">
+                  <span class="alert-num">{{ o.order_number }}</span>
+                  <span class="alert-name">{{ o.customer.full_name }}</span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if overdue_orders %}
+            <div class="alert-group a-amber">
+              <div class="alert-group-head">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Overdue
+              </div>
+              {% for o in overdue_orders %}
+              <div class="alert-entry">
+                <div class="alert-left">
+                  <span class="alert-num">{{ o.order_number }}</span>
+                  <span class="alert-name">{{ o.customer.full_name }}</span>
+                  <span class="alert-meta">due {{ o.pickup_date }}</span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if old_unpaid %}
+            <div class="alert-group a-red">
+              <div class="alert-group-head">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Unpaid 7+ Days
+              </div>
+              {% for o in old_unpaid %}
+              <div class="alert-entry">
+                <div class="alert-left">
+                  <span class="alert-num">{{ o.order_number }}</span>
+                  <span class="alert-name">{{ o.customer.full_name }}</span>
+                </div>
+                <div class="alert-right">KSh {{ o.total_price }}</div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+          </div>
+          {% else %}
+          <div class="all-clear">
+            <div class="all-clear-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span>All clear — no alerts</span>
+          </div>
+          {% endif %}
+
+        </div>
+
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <div style="width:12px; height:12px; border-radius:50%; 
-                    background:#bfdbfe;"></div>
-        <span style="font-size:13px;">New — {{ new_clients_ratio }}%</span>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ROW 6: ALERTS -->
-{% if urgent_uncollected or overdue_orders or old_unpaid %}
-<div style="margin-bottom:8px;">
-  <div style="font-size:11px; font-weight:700; text-transform:uppercase; 
-              letter-spacing:2px; color:#94a3b8; margin-bottom:12px;">
-    ⚠️ Alerts
-  </div>
-</div>
-<div style="display:grid; grid-template-columns:repeat(3,1fr); 
-            gap:16px; margin-bottom:32px;">
+    </div>
+    <!-- end col-right -->
 
-  {% if urgent_uncollected %}
-  <div style="background:#fef2f2; border:1px solid #fecaca; 
-              border-radius:12px; padding:20px;">
-    <div style="font-size:13px; font-weight:700; color:#b91c1c; 
-                margin-bottom:12px;">
-      ⚡ Urgent Not Collected
-    </div>
-    {% for order in urgent_uncollected %}
-    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
-                border-bottom:1px solid #fecaca;">
-      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
-    </div>
-    {% endfor %}
   </div>
-  {% endif %}
-
-  {% if overdue_orders %}
-  <div style="background:#fffbeb; border:1px solid #fde68a; 
-              border-radius:12px; padding:20px;">
-    <div style="font-size:13px; font-weight:700; color:#b45309; 
-                margin-bottom:12px;">
-      📅 Overdue Orders
-    </div>
-    {% for order in overdue_orders %}
-    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
-                border-bottom:1px solid #fde68a;">
-      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
-      <span style="color:#b45309;">· due {{ order.pickup_date }}</span>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  {% if old_unpaid %}
-  <div style="background:#fef2f2; border:1px solid #fecaca; 
-              border-radius:12px; padding:20px;">
-    <div style="font-size:13px; font-weight:700; color:#b91c1c; 
-                margin-bottom:12px;">
-      💸 Unpaid Over 7 Days
-    </div>
-    {% for order in old_unpaid %}
-    <div style="font-size:12px; color:#0f172a; padding:6px 0; 
-                border-bottom:1px solid #fecaca;">
-      <strong>{{ order.order_number }}</strong> — {{ order.customer.full_name }}
-      <span style="color:#b91c1c;">· KSh {{ order.total_price }}</span>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+  <!-- end band-b -->
 
 </div>
-{% endif %}
+<!-- end db-shell -->
 
-<!-- CHARTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-  const chartLabels = JSON.parse(document.getElementById('chartLabels').dataset.value);
-  const chartData = JSON.parse(document.getElementById('chartData').dataset.value);
-  const returningRatio = parseFloat(document.getElementById('returningRatio').dataset.value);
-  const newClientsRatio = parseFloat(document.getElementById('newClientsRatio').dataset.value);
+  /* ── data ── */
+  const _labels   = JSON.parse(document.getElementById('dChartLabels').dataset.value);
+  const _data     = JSON.parse(document.getElementById('dChartData').dataset.value);
+  const _ret      = parseFloat(document.getElementById('dReturning').dataset.value) || 0;
+  const _newC     = parseFloat(document.getElementById('dNewClients').dataset.value) || 0;
 
-  // Revenue chart
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  new Chart(ctx, {
+  /* ── Revenue bar chart ── */
+  const revCtx = document.getElementById('revenueChart').getContext('2d');
+  const gradFill = revCtx.createLinearGradient(0, 0, 0, 200);
+  gradFill.addColorStop(0, 'rgba(21,101,192,0.18)');
+  gradFill.addColorStop(1, 'rgba(21,101,192,0.02)');
+
+  new Chart(revCtx, {
     type: 'bar',
     data: {
-      labels: chartLabels,
+      labels: _labels,
       datasets: [{
-        label: 'Revenue (KSh)',
-        data: chartData,
-        backgroundColor: '#bfdbfe',
-        borderColor: '#2563eb',
-        borderWidth: 2,
-        borderRadius: 4,
+        data: _data,
+        backgroundColor: gradFill,
+        borderColor: '#1565C0',
+        borderWidth: 1.5,
+        borderRadius: 3,
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(66,165,245,0.4)',
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: c => 'KSh ' + c.parsed.y.toLocaleString()
-          }
+          backgroundColor: 'rgba(13,59,102,0.92)',
+          titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+          bodyFont:  { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
+          padding: 10,
+          cornerRadius: 6,
+          callbacks: { label: c => '  KSh ' + c.parsed.y.toLocaleString() }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
-          grid: { color: '#f1f5f9' },
+          grid: { color: 'rgba(21,101,192,0.05)', drawBorder: false },
+          border: { display: false },
           ticks: {
-            callback: val => 'KSh ' + val.toLocaleString()
+            font: { size: 9, family: "'Plus Jakarta Sans', sans-serif" },
+            color: '#6B8DA6',
+            callback: v => 'KSh ' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v)
           }
         },
         x: {
           grid: { display: false },
+          border: { display: false },
           ticks: {
-            maxTicksLimit: 10,
+            maxTicksLimit: 12,
             maxRotation: 0,
+            font: { size: 9, family: "'Plus Jakarta Sans', sans-serif" },
+            color: '#6B8DA6',
           }
         }
       }
     }
   });
 
-  // Loyalty donut chart
-  const ctx2 = document.getElementById('loyaltyChart').getContext('2d');
-  new Chart(ctx2, {
+  /* ── Loyalty donut ── */
+  new Chart(document.getElementById('loyaltyChart'), {
     type: 'doughnut',
     data: {
       labels: ['Returning', 'New'],
       datasets: [{
-        data: [returningRatio, newClientsRatio],
-        backgroundColor: ['#2563eb', '#bfdbfe'],
+        data: [_ret || 0.1, _newC || 0.1],
+        backgroundColor: ['#1565C0', '#90CAF9'],
         borderWidth: 0,
+        hoverOffset: 4,
       }]
     },
     options: {
       responsive: false,
-      plugins: { legend: { display: false } },
+      animation: { duration: 900 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
       cutout: '70%',
     }
   });
 
-  // Animate progress bars
-  document.querySelectorAll('.progress-bar').forEach(bar => {
-    const width = bar.getAttribute('data-width');
-    setTimeout(() => { bar.style.width = width + '%'; }, 100);
+  /* ── Progress bars ── */
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.prog-fill[data-w]').forEach(b => {
+      setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 300);
+    });
   });
 </script>
 

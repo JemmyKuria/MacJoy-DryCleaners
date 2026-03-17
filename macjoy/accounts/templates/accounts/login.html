@@ -3,165 +3,336 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MACJOY DrCleaners — Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <title>MACJOY DrCleaners — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
+    :root {
+      --sky-pale:  #EBF6FF;
+      --sky-soft:  #D4EDFA;
+      --sky-mid:   #90CAF9;
+      --sky-base:  #42A5F5;
+      --sky-deep:  #1565C0;
+      --sky-ink:   #0D3B66;
+      --white:     #FFFFFF;
+      --mist:      #E8F4FD;
+      --slate:     #3D5A73;
+      --steel:     #6B8DA6;
+      --line:      rgba(21,101,192,0.12);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      background: #f0f4f8;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(155deg, var(--sky-pale) 0%, var(--mist) 50%, var(--sky-soft) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      overflow: hidden;
     }
 
+    /* Background orbs matching hero */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orb1 {
+      width: 600px; height: 600px;
+      top: -15%; right: -12%;
+      background: radial-gradient(circle at 38% 32%, rgba(255,255,255,0.85), rgba(144,202,249,0.3) 55%, transparent 78%);
+      border: 1px solid rgba(144,202,249,0.35);
+    }
+    .orb2 {
+      width: 360px; height: 360px;
+      bottom: -8%; left: -6%;
+      background: radial-gradient(circle at 60% 65%, rgba(255,255,255,0.7), rgba(66,165,245,0.18) 55%, transparent 80%);
+      border: 1px solid rgba(144,202,249,0.3);
+    }
+    .orb3 {
+      width: 140px; height: 140px;
+      top: 60%; right: 12%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.8), rgba(144,202,249,0.35) 60%, transparent 80%);
+      border: 1px solid rgba(144,202,249,0.4);
+    }
+
+    /* Floating bubbles */
+    .bubble {
+      position: fixed;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(144,202,249,0.4) 60%, transparent 80%);
+      border: 1px solid rgba(144,202,249,0.45);
+      animation: floatUp linear infinite;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(-105vh) translateX(var(--sway, 20px)); opacity: 0; }
+    }
+
+    /* Card */
     .card {
-      background: #fff;
+      position: relative; z-index: 10;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(144,202,249,0.4);
       border-radius: 20px;
-      padding: 48px 40px;
+      padding: 3rem 2.8rem;
       width: 100%;
       max-width: 420px;
-      box-shadow: 0 8px 32px rgba(30, 64, 175, 0.10);
+      box-shadow: 0 12px 48px rgba(21,101,192,0.1), 0 2px 8px rgba(21,101,192,0.06);
     }
 
-    .brand {
-      text-align: center;
-      margin-bottom: 36px;
-    }
+    /* Brand */
+    .brand { text-align: center; margin-bottom: 2.4rem; }
 
-    .brand-icon {
-      width: 56px; height: 56px;
-      background: #1e40af;
-      border-radius: 14px;
+    .brand-bubble {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(144,202,249,0.55) 55%, rgba(66,165,245,0.25));
+      border: 1.5px solid rgba(144,202,249,0.6);
+      box-shadow: inset 0 -4px 12px rgba(66,165,245,0.15), 0 4px 20px rgba(66,165,245,0.15);
+      margin: 0 auto 1.2rem;
       display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 16px;
     }
+    .brand-bubble svg { color: var(--sky-deep); }
 
-    h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      letter-spacing: 2px;
-      color: #0f172a;
+    .brand-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--sky-ink);
+      letter-spacing: -0.01em;
+      line-height: 1;
     }
+    .brand-logo em { font-style: italic; color: var(--sky-base); }
 
-    h1 span { color: #2563eb; }
-
-    .subtitle {
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 4px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
+    .brand-sub {
+      font-size: 0.72rem;
       font-weight: 600;
-      color: #374151;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      color: var(--steel);
+      margin-top: 0.5rem;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--line);
+    }
+    .divider span {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--steel);
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1.3rem; }
+
+    .form-label {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 0.45rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-icon {
+      position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+      color: var(--steel); pointer-events: none;
+      display: flex; align-items: center;
     }
 
     input {
       width: 100%;
-      padding: 12px 16px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      color: #0f172a;
-      transition: border-color 0.2s;
+      padding: 0.75rem 0.9rem 0.75rem 2.5rem;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--sky-ink);
+      background: rgba(255,255,255,0.85);
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-
     input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      border-color: var(--sky-base);
+      box-shadow: 0 0 0 3px rgba(66,165,245,0.13);
+      background: var(--white);
     }
+    input::placeholder { color: var(--steel); opacity: 0.6; }
 
-    .btn {
+    /* Submit */
+    .btn-submit {
       width: 100%;
-      padding: 14px;
-      background: #1e40af;
-      color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.9rem;
+      background: var(--sky-deep);
+      color: var(--white);
       border: none;
-      border-radius: 10px;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 0.85rem;
       font-weight: 600;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.2s;
-      margin-top: 8px;
+      margin-top: 0.5rem;
+      transition: all 0.22s;
+      box-shadow: 0 4px 16px rgba(21,101,192,0.22);
     }
+    .btn-submit:hover {
+      background: var(--sky-ink);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(21,101,192,0.28);
+    }
+    .btn-submit svg { transition: transform 0.22s; }
+    .btn-submit:hover svg { transform: translateX(3px); }
 
-    .btn:hover { background: #2563eb; }
+    /* Error */
+    .alert-error {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #991B1B;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1.4rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .alert-error svg { flex-shrink: 0; }
 
-    .error {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #b91c1c;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      margin-bottom: 20px;
+    /* Footer */
+    .card-footer {
+      margin-top: 1.8rem;
       text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
     }
+    .footer-flag { font-size: 0.85rem; line-height: 1; }
+    .card-footer p {
+      font-size: 0.72rem;
+      color: var(--steel);
+      font-weight: 400;
+    }
+    .card-footer strong { font-weight: 600; color: var(--slate); }
 
-    .footer-text {
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 24px;
+    /* Back link */
+    .back-link {
+      position: fixed; top: 1.8rem; left: 2rem; z-index: 20;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--slate);
+      text-decoration: none;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid var(--line);
+      border-radius: 100px;
+      padding: 0.45rem 1rem 0.45rem 0.7rem;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
     }
+    .back-link:hover { color: var(--sky-deep); border-color: var(--sky-mid); background: rgba(255,255,255,0.92); }
   </style>
 </head>
 <body>
+
+  <!-- BG orbs -->
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <!-- Back to site -->
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to site
+  </a>
+
+  <!-- Card -->
   <div class="card">
+
     <div class="brand">
-      <div class="brand-icon">👔</div>
-      <h1>MACJOY <span>DrCleaners</span></h1>
-      <p class="subtitle">Sign in to your account</p>
+      <div class="brand-bubble">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <div class="brand-logo">MAC<em>JOY</em> DrCleaners</div>
+      <div class="brand-sub">Staff Portal</div>
     </div>
+
+    <div class="divider"><span>Sign in to continue</span></div>
 
     {% if messages %}
       {% for message in messages %}
-        <div class="error">{{ message }}</div>
+        <div class="alert-error">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ message }}
+        </div>
       {% endfor %}
     {% endif %}
 
     <form method="POST">
       {% csrf_token %}
+
       <div class="form-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Enter your username"
-          required
-        />
+        <label class="form-label" for="username">Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username"/>
+        </div>
       </div>
+
       <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          required
-        />
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password"/>
+        </div>
       </div>
-      <button type="submit" class="btn">Sign In →</button>
+
+      <button type="submit" class="btn-submit">
+        Sign In
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
     </form>
 
-    <p class="footer-text">MACJOY DrCleaners · Nairobi, Kenya 🇰🇪</p>
+    <div class="card-footer">
+      <span class="footer-flag">🇰🇪</span>
+      <p><strong>MACJOY DrCleaners</strong> · Nairobi, Kenya</p>
+    </div>
+
   </div>
+
+  <script>
+    // Floating bubbles — same as landing page
+    function mkBubble() {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const s = 6 + Math.random() * 32;
+      b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:-4%;
+        animation-duration:${13+Math.random()*16}s;animation-delay:${Math.random()*5}s;
+        --sway:${(Math.random()-.5)*60}px;`;
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 32000);
+    }
+    for (let i = 0; i < 7; i++) mkBubble();
+    setInterval(mkBubble, 3000);
+  </script>
+
 </body>
 </html>
