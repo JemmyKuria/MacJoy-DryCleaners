@@ -6,3 +6,6 @@ cmds = ["pip install -r requirements.txt"]
 
 [start]
 cmd = "gunicorn macjoy.wsgi --log-file -"
+
+
+VIRTUAL_ENV=
